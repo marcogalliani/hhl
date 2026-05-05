@@ -1,0 +1,2834 @@
+Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.
+Digital Object Identifier 10.1109/ACCESS.2022.0122113
+
+arXiv:2108.09004v4 [quant-ph] 25 Mar 2023
+
+A Step-by-Step HHL Algorithm Walkthrough to
+Enhance Understanding of Critical Quantum
+Computing Concepts
+ANIKA ZAMAN1 , HECTOR JOSE MORRELL2 , HIU YUNG WONG.3 , (Senior Member, IEEE)
+1
+
+Department of Electrical Engineering, San Jose State University, San Jose, CA 95192 USA (email: anika.zaman@sjsu.edu)
+Department of Electrical Engineering, San Jose State University, San Jose, CA 95192 USA (email:
+hector.morrell@sjsu.edu)
+3
+Department of Electrical Engineering, San Jose State University, San Jose, CA 95192 USA (email:
+hiuyung.wong@sjsu.edu)
+2
+
+Corresponding author: Hiu Yung Wong (email: hiuyung.wong@sjsu.edu). A. Zaman and H. J. Morrell have equal
+contributions.
+Part of this work was supported by the National Science Foundation under Grant 2046220.
+
+ABSTRACT After learning basic quantum computing concepts, it is desirable to reinforce the
+learning using an important and relatively complex algorithm through which students can observe
+and appreciate how qubits evolve and interact with each other. Harrow-Hassidim-Lloyd (HHL)
+quantum algorithm, which can solve linear system problems with exponential speed-up over the
+classical method and is the basis of many important quantum computing algorithms, is used to
+serve this purpose. The HHL algorithm is explained analytically followed by a 4-qubit numerical
+example in bra-ket notation. Matlab code corresponding to the numerical example is available for
+students to gain a deeper understanding of the HHL algorithm from a pure matrix point of view.
+A quantum circuit programmed using qiskit is also provided for real hardware execution in IBM
+quantum computers. After going through the material, students are expected to have a better
+appreciation of the concepts such as basis transformation, bra-ket and matrix representations,
+superposition, entanglement, controlled operations, measurement, quantum Fourier transformation,
+quantum phase estimation, and quantum programming. To help readers review these basic concepts,
+brief explanations augmented by the HHL numerical examples in the main text are provided in the
+Appendix.
+INDEX TERMS Harrow-Hassidim-Lloyd (HHL) quantum algorithm, Quantum Fourier transform
+(QFT), inverse quantum Fourier transform (IQFT), quantum phase estimation(QPE),linear system
+problem (LSP), Quantum Education
+
+I. INTRODUCTION
+
+UANTUM Computing is promising in solving challenging engineering [1], biomedical [2] and finance
+[3] problems. It has a tremendous advancement in the
+last two decades and, recently, quantum breakthrough
+has been demonstrated using a 53-qubit system [4].However, according to the paper [5], due to less efficient
+hardware implementation till date, the goal to reach
+superconducting quantum supremacy is yet to achieve.
+Therefore, the training of a quantum technology workforce is an imminent goal for many countries (e.g. [23])
+to support this fast-growing industry. However, quantum
+
+Q
+
+VOLUME 3, 2022
+
+technology is based on concepts very different from our
+daily and classical experiences. In the early stage of
+learning quantum computing, although linking to daily
+and classical experience may enhance the understanding
+of certain quantum concepts and such an approach
+should not be de-emphasized, we believe a fast and
+robust way of training a quantum workforce is to train
+the students to be able to emulate a quantum processor
+and trace the evolution of the qubits. This is particularly useful in learning quantum algorithms without
+a quantum mechanics background. Such an approach
+obviates the students from cognitive conflicts, which can
+
+1
+
+Author et al.:
+
+be resolved later, if possible, after they understand how
+quantum computing works. This also embraces the “Shut
+up and calculate!” approach proposed by Mermin on how
+to deal with the uncomfortable feeling toward quantum
+mechanics interpretation [6].
+Besides analytical equations, matrix representation
+and computer simulations are important tools to enhance the understanding of qubit evolution. However,
+available examples that include computer simulations
+are usually of simple algorithms and, very often, without matrix representation. There is a lack of examples
+of important and relatively complex algorithms which
+combine some of the most important quantum computing concepts and basic algorithms. Such examples are
+desirable to allow students to appreciate the roles and
+the interplay of various basic concepts in a more realistic quantum algorithm. Harrow-Hassidim-Lloyd (HHL)
+quantum algorithm [7] [8] which can be used to solve linear system problems (LSP) and can provide exponential
+speedup over the classical conjugate gradient method
+[9] is chosen for this purpose. HHL is the basic of many
+more advanced algorithms and is important in various
+applications such as machine learning [10] and modeling
+of quantum systems [2] [11]. HHL solves system of
+linear equation which is a discretization of [12] [13].
+In this paper, we detail the qubit evolution in HarrowHassidim-Lloyd (HHL) quantum algorithm analytically
+with a 4-qubit circuit as a numerical example. Although
+HHL examples are available elsewhere (e.g. [14] [15]),
+this paper has certain characteristics which are not all
+found in those examples. Firstly, the HHL algorithm is
+discussed analytically step-by-step and is self-contained.
+Secondly, a numerical example is given in bra-ket notation mirroring the analytical equations. Thirdly, a
+Matlab code corresponding exactly to the numerical
+example is available to enhance the understanding from
+a matrix point of view. The Matlab code allows the
+students to trace how the wavefunction evolves instead
+of just seeing the magnitudes of the coefficients as in
+IBM-Q. Fourthly, a qiskit code written in python [16]
+corresponding to the numerical example is available and
+can be run in IBM simulation and hardware machines
+[17]. Finally, in the example, all the 4 qubits are traced
+throughout the process without simplification.
+The readers are assumed to have the following background concepts which are further enhanced through
+the step-by-step walkthrough of the HHL algorithm: basis transformation, bra-ket and matrix representations,
+superposition, entanglement, encoding, controlled operations, measurement, quantum Fourier transformation,
+and quantum programming. To make this paper selfcontained and to help the readers better appreciate the
+roles of these basic concepts in the HHL, an Appendix
+is devoted to briefly explaining these concepts using
+the examples from the main text. A more detailed
+explanation of these concepts using a similar approach
+2
+
+as in this paper can be found in [19].
+A. HOW TO USE THIS PAPER
+
+For readers who have a fresh memory of the basic concepts, they can start reading from Section II, in which
+the HHL algorithm is discussed step-by-step analytically
+followed by a numerical example in Section III. The basic
+concepts mentioned in the Appendix are referred to in
+the main text and readers are encouraged to review them
+when needed.
+For readers who need reviews on the basic concepts
+first, they are encouraged to go over the Appendix first
+before reading the main text.
+For readers who have devoted substantial time to
+learning HHL elsewhere but just need a numerical example to reinforce the understanding, they might start
+with the numerical example in Section III.
+Equations in the Appendix begin with ’V’. If the
+equations are examples from the main text, the same
+equation number is used in the Appendix.
+II. HHL ALGORITHM
+A. DEFINITIONS AND OVERVIEW
+
+We will first give an overview of the problem and the
+HHL algorithm. Details will be discussed in the following
+subsections with reference to the Appendix for reviewing
+basic concepts. A linear system problem (LSP) can be
+represented as the following
+A~x = ~b
+
+(1)
+
+where A is a Nb × Nb Hermitian matrix and ~x and ~b
+are Nb -dimensional vectors. For simplicity, it is assumed
+Nb = 2nb , where nb is the number of qubits in the
+quantum circuit, and Nb is the total combinations due
+number of qubits,nb . In matrix representation, qubits
+are represented by their total combinations(Nb × Nb ),
+or we can say for Nb number of unknowns, we need
+nb qubits to solve unknowns. Dummy equations can
+be added otherwise to convert the system satisfy this
+assumption. A and ~b are known and ~x is the unknown
+to be solved, i.e.
+~x = A−1~b
+(2)
+
+
+
+
+0
+1 − 31 ~
+,b=
+, and ~x =
+As an example, A =
+1
+1
+−
+1
+3
+ 
+3
+8
+9
+8
+
+with nb = 1 and Nb = 21 = 2. Readers may refer
+
+to Appendix V-13 and Appendix V-14 to review how
+LSP is solved classically using Gaussian Elimination and
+Conjugate Gradient Method, respectively.
+A is assumed to be Hermitian (See Appendix
+ V-1).If
+0 A
+,
+it is not Hermitian, the A can be converted to
+A† 0
+which is Hermitian. Readers may refer to [20] for the
+more advanced treatment when A is not Hermitian.
+VOLUME 3, 2022
+
+Author et al.:
+
+FIGURE 1. Schematic of the HHL quantum circuit flowing from left to right. The circuit is decomposed into top and bottom portions for clarity. Note that
+the lowest qubit in the diagram is the most significant bit (MSB) while the top one is the least significant bit (LSB).
+
+Figure 1 shows the schematic of the HHL algorithm
+and the corresponding circuit to solve LSP. In the HHL
+quantum algorithm, the Nb components of ~b and ~x
+are encoded as the amplitudes/coefficients (amplitude
+encoding) of basis states of the nb -qubits, | ib , which
+form a CNb Hilbert space. These nb qubits are called
+b-register. Qubit nb is chosen to be large enough to
+encode ~b, i.e. 2nb needs to be the same as the length of
+the vectors ~b and ~x. The matrix A is simulated through
+Hamiltonian encoding by encoding it as the Hamiltonian
+of a unitary gate. Appendix V-9 reviews examples of
+various encoding schemes.
+The HHL algorithm has 5 main components, namely
+state preparation, quantum phase estimation (QPE),
+ancilla bit rotation, inverse quantum phase estimation
+(IQPE), and measurement. In this paper, the littleendian convention is used. In a little-endian convention,
+the rightmost (ending) qubit represents the least significant bit (LSB). For example, in a 4-qubit system, |0001i
+in binary is |1i in decimal because the 1 in the basis
+state |0001i is the LSB, representing 20 instead of 23 (if
+it were the most significant bit, MSB). Moreover, in the
+circuit diagrams, the lowest qubit represents the MSB
+and the topmost qubit represents the LSB, which is a
+VOLUME 3, 2022
+
+convention used in qiskit [16] and the IBM-Q platform
+[17]
+As shown in Figure 1, besides the b-register, which
+belongs to the more significant bits, there are two
+more sets of inputs to the algorithm. The first set is
+sometimes called the c-register because it is related
+to the time (clock) in the controlled rotation in the
+QPE part. Therefore, they are also called the clock
+qubits.The c-register stores the values of the phase of
+the eigenvalues of the A matrix after the QPE. There are
+n qubits in the c-register. Since basis encoding is used
+(i.e. the phase value is encoded as the basis number (See
+Appendix V-9), the value of n determines how accurately
+the phase can be stored. A larger n results in higher
+accuracy when the encoding is not exact. We set N = 2n .
+The last set of qubits is the ancilla qubit | ia which
+is the LSB. The ancilla qubit, as its name implies, is
+important to help achieve the goal although it will be
+discarded at the end, as will be detailed later.
+The matrix A, which is a Hamiltonian, may be written
+as a linear combination of the outer products of its
+eigenvectors, |ui i hui | weighted by its eigenvalues, λi ,in
+Eq.(3), (See Appendix V-8).
+3
+
+Author et al.:
+
+b −1
+2n
+X
+
+A=
+
+λi |ui i hui |
+
+(3)
+
+i=0
+
+Since A is diagonal
+its eigenvector basis, its inverse
+Pin
+2nb −1 −1
+is simply, A−1 =
+λi |ui i hui |. ~b can be also
+i=0
+expressed in the basis formed by the eigenvectors of A,
+such that
+b −1
+2n
+X
+|bi =
+bj |uj i
+(4)
+j=0
+
+Therefore, Eq. (2) can be encoded as,
+|xi = A
+
+−1
+
+|bi =
+
+b −1
+2n
+X
+
+β0
+β1
+..
+.
+
+
+
+
+
+
+~b = 
+
+ ⇔ β0 |0i+β1 |1i+· · ·+βNb −1 |Nb − 1i = |bi
+
+
+βNb −1
+(9)
+The vector ~b is represented in a column form on the
+left with coefficients β 0 s. This is also a valid representation of |bi. On the right, the corresponding basis of
+the Hilbert space formed by the nb qubits is written
+explicitly. Therefore,
+|Ψ1 i = |bib |0 · · · 0ic |0ia
+
+λ−1
+i bi |ui i
+
+(5)
+
+i=0
+
+by using the fact that hui |uj i = δij . The goal of the HHL
+algorithm is to find the solution in this form and |xi is
+stored in the b-register.Storing the right hand side of
+(5) in the b-register is equivalent to storing |xi in the bregister. But the solution is encoded as the amplitudes
+of the basis vectors |0i / |1i (the measurement basis).
+Therefore, the solutions are not λ−1
+i bi , which are the
+amplitudes of the eigenvector basis vectors. However,
+one will naturally get the correct amplitudes if it is
+measured in the |0i / |1i basis and this is only possible
+if the qubits are not entangled with other qubits. This
+can be checked mathematically replacing |ui i by |0i / |1i
+based on their relationship. If |ui i are entangled with
+other qubits, one cannot obtain the desired solution.
+This will be clear after the ancilla bit rotation to be
+detailed later.
+The equation needs also to be prepared so that the
+eigenvectors, |ui i, and |bi are normalized so they can
+be properly represented as a unit vector in quantum
+computing. Therefore, (4) and Eq. (5) require
+b −1
+2n
+X
+
+|bj |2 = 1
+
+j=0
+
+(6)
+b −1
+2n
+X
+
+
+
+2
+|λ−1
+i bi | = 1
+
+(7)
+
+i=0
+
+(10)
+
+From now on, some of the subscripts of the kets will
+be omitted when there is no ambiguity. Since the state
+preparation depends on the actual value of ~b, it will be
+discussed in more detail in the numerical example.
+C. QUANTUM PHASE ESTIMATION
+
+Quantum phase estimation (QPE) is also an eigenvalue estimation algorithm. QPE has three components,
+namely the superposition of the clock qubits through
+Hadamard gates, controlled rotation, and inverse quantum Fourier transform (IQFT). The goal of QPE is to
+estimate the phase of the eigenvalues of the unitary
+rotation matrix, U = eiAt , in the controlled gate, C − U,
+(Fig. 1) used in the QPE. Again, this gate encodes the
+matrix A as its Hamiltonian. It is also instructive to
+note that the eigenvalues of U must be roots of unity
+(i.e. in the form of eiθ ) as U is unitary. Therefore, the
+phase of the eigenvalue of the gate is proportional to the
+eigenvalue of A. As a result, by using QPE in the HHL
+algorithm, it is expected the eigenvalues of A will be
+encoded in the c-register after the QPE, i.e. at |Ψ4 i. As
+it will be clear later, the eigenvalues are only encoded
+through basis encoding. The c-register does not store the
+exact eigenvalues.
+Here we assume the readers are already familiar with
+IQFT and it will not be explained in detail. Readers may
+review the basic concepts in Appendices V-11 and V-12.
+In the first step of QPE, Hadamard gates are applied
+to the clock qubits to create a superposition of the clock
+qubits,
+I⊗nb ⊗ H⊗n ⊗ I |Ψ1 i
+(11)
+1
+(12)
+=
+|bi n (|0i + |1i)⊗n |0i
+22
+In the controlled rotation part, controlled gates are
+applied to |bi with the clock qubits as the controlling
+qubits (Figure 2). The number of the qubit, n, of the cregister determines the number of the controlled gates.
+r
+The gates are in the form of U2 , where r is the index of
+iAt
+the clock qubit. Also, U = e . For the most significant
+n−1
+bit in the c-register, |cn−1 i, it controls the gate U2
+|Ψ2 i =
+
+B. STATE PREPARATION
+
+There are total nb + n + 1 qubits and they are initialized
+as
+⊗nb
+
+|Ψ0 i = |0 · · · 0ib |0 · · · 0ic |0ia = |0i
+
+|0i
+
+⊗n
+
+|0i
+
+(8)
+
+In the state preparation, |0 · · · 0ib in the b-register
+needs to be rotated to have the amplitudes correspond
+to the coefficients of ~b. That is
+4
+
+VOLUME 3, 2022
+
+Author et al.:
+
+due to destructive interference. By ignoring the states
+with zero amplitude, we may rewrite |Ψ4 i as
+2n −1
+
+X
+1
+|Ψ4 i = n |bi
+e2πik·0 |Nφi |0ia
+2
+k=0
+
+= |bi |Nφi |0ia
+
+FIGURE 2. The controlled-rotation part of QPE. U is replaced by eiAt in the
+HHL algorithm.
+
+on the b-register while the least significant one, |c0 i,
+0
+controls the gate U2 = U on the b-register.
+To understand how it works, we begin by assuming
+that |bi is an eigenvector of U with eigenvalue e2πiφ .
+The eigenvalue is written in this form so that the phase,
+φ, will be encoded as the basis state in the c-register
+(See Eq. (16)). Therefore, based on the definition of
+eigenvalues and eigenvectors (See Section V-8),
+U |bi = e2πiφ |bi
+
+Therefore, in QPE, the clock qubits are used to
+represent the phase information of U, which is φ, and
+the accuracy depends on the number of qubits, n.
+Since in Hamiltonian encoding, U is related to A
+through
+U = eiAt
+
+where t is the evolution time for that Hamiltonian. U is
+also diagonal in A0 s eigenvector, |ui i, basis. If |bi = |uj i,
+U |bi = eiλj t |uj i
+
+1
+2πiφ2n−1
+|1i) ⊗ (|0i +
+n (|0i + e
+22
+
+n−2
+0
+e2πiφ2
+|1i) ⊗ · · · ⊗ (|0i + e2πiφ2 |1i) ⊗ |0ia
+
+|Ψ3 i = |bi ⊗
+
+n
+
+2 −1
+1 X 2πiφk
+= |bi n
+e
+|ki |0ia
+2 2 k=0
+
+|Ψ4 i = |uj i |Nλj t/2πi |0ia
+
+(14)
+
+2 −1
+1 X 2πiφk
+e
+(IQFT |ki) |0ia
+n
+2 2 k=0
+
+e
+
+e
+
+|yi) |0ia
+
+|Ψ4 i =
+
+b −1
+2n
+X
+
+bj |uj i |λ̃j i |0ia
+
+(21)
+
+j=0
+
+b −1
+2n
+X
+
+j=0
+
+n
+
+2X
+−1 2X
+−1
+1
+= n |bi
+e2πik(φ−y/N) |yi |0ia
+2
+y=0
+
+(15)
+
+k=0
+
+Due to interference, only |yi satisfying the condition
+P2n −1
+φ − y/N = 0 will have a finite amplitude of k=0 e0 =
+n
+P
+2 −1
+2n . Otherwise, the amplitude is k=0 e2πik(φ−y/N) = 0
+VOLUME 3, 2022
+
+(20)
+
+The λj are usually not integers. We will choose t so
+that λ̃j = Nλj t/2π are integers. Therefore, λ̃j are usually
+scaled version of λj .
+Ψ4 can be rewritten as
+
+|Ψ5 i =
+
+y=0
+
+k=0
+n
+
+(
+
+−2πiyk/N
+
+bj |uj i |Nλj t/2πi |0ia
+
+j=0
+
+The next step is to rotate the ancilla qubit, |0ia , based
+on the encoded eigenvalues in the c-register, such that,
+
+n
+
+2πiφk
+
+b −1
+2n
+X
+
+D. CONTROLLED ROTATION AND MEASUREMENT OF THE
+ANCILLA QUBIT
+
+n
+
+2 −1
+1 X 2πiφk
+e
+|ki) |0ia
+|Ψ4 i = |bi IQFT( n
+2 2 k=0
+
+1
+= |bi n
+2
+
+(19)
+
+Thus the eigenvalues of A have been encodeded in the
+clock qubits (basis encoding). However, in general, given
+in (4), by superposition,
+
+In the IQFT part,(15), only the clock qubits are
+affected. Note that in certain literature, this is called
+Quantum Fourier Transform (QFT) (Appendix V-11).
+
+n
+2X
+−1
+
+(18)
+
+By equating iλj t to 2πiφ in Eq. (13), we get φ =
+λj t/2π and Eq. (16) becomes
+
+|Ψ4 i =
+
+n
+2X
+−1
+
+(17)
+
+(13)
+
+When the control clock qubit is |0i, |bi will not be
+affected. If the clock bit is |1i, U will be applied to |bi.
+j
+This is equivalent to multiplying e2πiφ2 in front of the
+|1i of the jth clock qubit, |cj i, as one can assign the
+prefactor to the controlling qubit. Therefore, after the
+controlled-U operation, we have
+
+= |bi
+
+(16)
+
+s
+bj |uj i |λ̃j i ( 1 −
+
+C2
+λ̃j
+
+2 |0ia +
+
+C
+|1ia ) (22)
+λ̃j
+
+where C is a constant. The goal is to show why this is
+useful.
+When the ancilla qubit is measured, the ancilla qubit
+wavefunction will collapse to either |0i or |1i. If it is |0i,
+the result will be discarded and the computation will
+be repeated until the measurement is |1i. Therefore, the
+final wavefunction of interest is
+5
+
+Author et al.:
+
+1
+|Ψ6 i = qP nb
+
+2 −1 bj C 2
+| λ̃ |
+j=0
+j
+
+b −1
+2n
+X
+
+bj |uj i |λ̃j i
+
+j=0
+
+C
+|1ia
+λ̃j
+
+|Ψ8 i =
+(23)
+
+b −1
+2n
+X
+
+1
+2n/2
+
+q P nb
+
+2 −1 bj C 2
+| λ̃ |
+j=0
+j
+
+j=0
+
+bj C
+|uj i
+λ̃j
+
+n
+
+·(
+
+2X
+−1
+
+e−iλj ty e2πiyλ̃j /N |yi) |1ia
+
+(25)
+
+y=0
+
+where the prefactor is due to normalization after measurement. Since | λ̃C |2 is the probabily of obtaining |1i
+j
+when the ancilla bit is measured, C should be chosen to
+be as large as possible. Compared to (5), the result resembles the answer |xi that we are looking for. However,
+we can only obtain the correct result if the b-register is
+measured in the eigenvector basis (i.e. |uj i instead of
+|0i / |1i). However, the b-register is entangled with the
+clock qubits, |λ̃j i. This means that we cannot factorize
+the result into a tensor product of the c-register and bregister (See the discussion after (5) and Appendix V-6).
+As a result, we cannot convert the b-register into the
+|0i / |1i measurement basis with the desired amplitudes.
+We will need to uncompute the state so that it gives the
+right results in the |0i / |1i measurement during which
+the b-register and c-register will be unentangled.
+The measurement of the ancilla qubit can be and
+is usually performed after uncomputation. However,
+since the ancilla bit is not involved in any operations
+after the controlled rotation, measuring the ancilla bit
+before the uncomputation gives the same result. For
+simplicity in the derivation, it is thus performed before
+the uncomputation.
+
+|Ψ7 i = qP nb
+
+2 −1 bj C 2
+| λ̃ |
+j=0
+j
+
+1
+= q P nb
+
+2 −1 bj C 2
+| λ̃ |
+j=0
+j
+
+j=0
+b −1
+2n
+X
+
+j=0
+
+2n/2
+
+q P nb
+
+2 −1 bj C 2
+| λ̃ |
+j=0
+j
+
+=
+2n/2
+
+j=0
+
+n
+
+2X
+−1
+bj C
+|uj i
+|yi |1ia
+λ̃j
+y=0
+
+C
+qP n
+
+2 b −1 bj C 2
+| λj |
+j=0
+
+|xi
+
+n
+2X
+−1
+
+|yi |1ia
+
+y=0
+
+(26)
+The clock qubits and the b-register are now unentangled and the b-register stores |xi. By applying the
+Hadamard gate on the clock qubits, finally, we have
+
+|Ψ9 i = qP n
+
+b −1
+2n
+X
+
+1
+
+2 b −1 bj C 2
+| λj |
+j=0
+
+= qP n
+
+C
+
+j=0
+
+bj C
+⊗n
+|uj i |0i |1ia
+λj
+⊗n
+
+2 b −1 bj C 2
+| λj |
+j=0
+
+|xib |0ic |1ia
+
+(27)
+
+If C is real and by using (7),
+1
+
+2 b −1 bj 2
+| λj |
+j=0
+
+The uncomputation is done by using inverse QPE.
+Firstly, QFT is applied to the clock qubits as,
+b −1
+2n
+X
+
+|Ψ8 i =
+
+b −1
+2n
+X
+
+1
+
+|Ψ9 i = qP n
+
+E. UNCOMPUTATION - INVERSE QPE
+
+1
+
+Since we earlier chose to set λ̃j = Nλj t/2π, therefore,
+the two exponential terms cancel each other and
+
+⊗n
+
+|xib |0ic |1ia
+
+⊗n
+
+= |xib |0ic |1ia
+
+(28)
+
+Here, the solution |xi (Eq. 5) is stored in the b-register
+successfully.
+bj C
+|uj i QFT |λ̃j i |1ia
+λ̃j
+
+III. NUMERICAL EXAMPLE
+
+We will present a numerical example and apply HHL
+to it step-by-step. The implementation is shown in
+Figure 3. Firstly, we will discuss how to implement the
+controlled-U and ancilla qubit rotations.
+
+bj C
+|uj i
+λ̃j
+
+n
+
+2 −1
+
+1 X 2πiyλ̃j /N
+· ( n/2
+e
+|yi) |1ia
+2
+y=0
+
+(24)
+
+Then inverse controlled-rotations of the b-register by
+the clock qubits are applied with U−1 = e−iAt . Similar to
+the forward process, when the controlling rth clock qubit
+is |0i, |uj i will not be affected. If the rth clock qubit is
+r
+|1i, (U−1 )2 will be applied to |uj i. This is equivalent
+to multiplying e−iλj ty if the c-register is |yi. This is due
+to the similar argument in Eq. (14) and the fact that
+2πiφ = iλj t. Therefore,
+6
+
+A. ENCODING SCHEME
+
+In this example, the matrix A and vector ~b are set to be
+
+
+1 − 31
+A=
+(29)
+− 31
+1
+ 
+~b = 0
+(30)
+1
+!
+!
+The eigenvectors of A are u~0 =
+with eigenvalues λ0 = 23 and λ1 =
+
+−1
+−1
+√
+√
+2 , u
+2
+~
+=
+1
+−1
+√
+√1
+2
+2
+4
+3 respectively. We
+VOLUME 3, 2022
+
+Author et al.:
+
+need to using basis encoding to encode the eigenvalues
+in the basis formed by the clock qubit and 2 qubits are
+needed by encoding λ0 as |01i and λ1 as |10i so that it
+maintains the ratio of λ1 /λ0 = 2. This means λ˜0 = 1 and
+λ˜1 = 2 or in other words, |λ˜0 i = |01i and |λ˜1 i = |10i.
+This gives a perfect encoding with n = 2 (i.e. N = 4).
+Therefore, t is chosen to be 3π
+4 to achieve the encoding
+scheme since λ̃j = Nλj t/2π.
+Since ~b is a 2-dimensional complex vector, it can be
+encoded using 1 qubit and, thus, nb = 1.
+The solution to the LSP is found to be
+3
+~x = 89
+(31)
+
+U2diag = Udiag Udiag =
+
+−1
+√
+2
+−1
+√
+2
+
+B. CONTROLLED-U IMPLEMENTATION
+
+−1
+√
+2
+√1
+2
+
+(32)
+
+Since V is real and symmetric,its conjugate, V† equals
+itself.
+The diagonalized A, i.e. expressed in the basis formed
+by u~0 and u~0 , is
+Adiag = V† AV
+2
+
+0
+3
+=
+0 34
+
+(33)
+
+As it is diagonal, U can be obtained by exponentiation
+of the elements accordingly.
+
+ iλ t
+e 0
+0
+Udiag =
+0
+eiλ1 t
+ iπ/2
+
+e
+0
+=
+0
+eiπ
+
+
+i
+0
+=
+0 −1
+
+!
+
+i
+0
+
+−1
+√
+2
+√1
+2
+
+−1
+√
+2
+−1
+√
+2
+
+(34)
+
+!
+
+(36)
+
+U2 = VU2diag V†
+=
+
+=
+
+−1
+√
+2
+−1
+√
+2
+
+−1
+√
+2
+√1
+2
+
+!
+
+0
+−1
+
+−1
+0
+
+
+
+−1
+0
+
+
+0
+1
+
+−1
+√
+2
+−1
+√
+2
+
+−1
+√
+2
+√1
+2
+
+!
+
+(37)
+
+To implement U and U2 , a 4-parameter arbitrary
+unitary gate with global phase [19],
+
+U=
+
+eiγ cos(θ/2)
+i(γ+φ)
+e
+sin(θ/2)
+
+−ei(γ+λ) sin(θ/2)
+ei(γ+φ+λ) cos(θ/2)
+
+
+(38)
+
+By choosing θ = π, φ = π, λ = 0, γ = 0, U2 is
+implemented.
+By choosing θ = π/2, φ = −π/2, λ = π/2, γ = 3π/4,
+U is implemented.
+For the IQPE part, we also need to implement U−1
+−1
+and U−2 . Since in this example, (U2 ) = U2 , one can
+use the same set of parameters to implement (U2 )−1 .
+However,
+
+U−1 =
+
+1
+2
+
+
+
+−1 − i
+1−i
+
+1−i
+−1 − i
+
+
+(39)
+
+We need to choose θ = π/2, φ = π/2, λ = −π/2, γ =
+−3π/4 to implement U−1 .
+The controlled version of matrix U0 can then be
+constructed using
+C − U0 = I ⊗ |0i h0| + U0 ⊗ |1i h1|
+
+where t = 3π/4 as mentioned earlier is used. Also,
+VOLUME 3, 2022
+
+−1
+√
+2
+√1
+2
+
+
+0
+=
+−1
+
+
+1 −1 + i 1 + i
+=
+2 1 + i −1 + i
+
+whereby, the ratio of |x0 | to |x1 |2 is 1 : 9.
+
+−1
+√
+2
+−1
+√
+2
+
+(35)
+
+U = VUdiag V†
+
+8
+
+=
+
+
+0
+1
+
+−1
+0
+
+It is worth noting that both are naturally unitary
+which is a requirement for a quantum operation.
+To obtain U and U2 in the original basis, we need
+to apply similarity transformation again in the reverse
+direction,
+
+2
+
+In reality, we expect the controlled-U operation to be
+implemented by Hamiltonian simulation [18]. However,
+to understand the algorithm, we will derive the matrix
+for U and then map this to the Controlled − U gate used
+in IBM-Q directly. Since n = 2, there are two operations
+1
+0
+needed, namely U2 = U2 and U2 = U, controlled by
+c1 and c0 , respectively.
+In order to find the corresponding matrix for U2 =
+i2At
+e
+and U = eiAt , we need to perform similarity
+transformation on i2At and iAt, exponentiate then, and
+transforms back to the original basis.
+The transformation matrix from the original basis to
+the eigenvector basis is
+
+V = u~0 u~1
+!
+
+
+
+(40)
+
+Note that in this equation, only the controlling clock
+bit and the b-register are included for simplicity. For
+example,
+7
+
+Author et al.:
+
+The following function can achieve the goal,
+
+
+
+ 
+
+1
+−1
+−
+i
+1
+−
+i
+1
+0
+1
+0
+C − U−1 =
+⊗
++
+0 1
+0 0
+2 1 − i −1 − i
+π
+
+
+θ(c) = θ(c1 c0 ) = c1 + πc0
+(47)
+0 0
+3
+⊗
+0 1
+Therefore, the controlled rotation can be implemented
+
+
+
+
+0
+0
+0
+0
+1 0 0 0
+as
+0 0 0 0 1 0 −1 − i 0 1 − i 
+
+
+
+=
+0 0 1 0 + 2 0
+0
+0
+0 
+π
+0 1 − i 0 −1 − i
+0 0 0 0
+|1i h1| ⊗ I ⊗ RY( ) + |0i h0| ⊗ I ⊗ I+
+
+
+3
+2
+0
+0
+0
+I ⊗ |1i h1| ⊗ RY(π) + I ⊗ |0i h0| ⊗ I
+(48)
+1
+0 −1 − i 0 1 − i 
+
+
+= 
+(41)
+0
+2
+0 
+2 0
+where the operators operate on qubits |c1 i, |c0 i, and
+0 1 − i 0 −1 − i
+|ai from left to right, respectively.
+C. IMPLEMENTATAION OF THE CONTROLLED-ROTATION
+OF ANCILLA QUBIT
+
+The coefficients of |0iq
+and |1i of the ancilla bit after ro2
+tation in Eq. (22) are 1 − C 2 and λ̃C , respectively. The
+λ̃j
+j
+sum of the square of the magnitudes of the coefficients is
+1 as required. This means also C ≤ λ̃j . Since the minimal
+λ̃j is 1, we will set C = 1 to maximize the probability of
+measuring |1i during the ancilla bit
+q measurement.
+The transformation of |0ia to 1 − 12 |0ia + λ̃1 |1ia
+λ̃j
+
+j
+
+D. QUANTUM CIRCUIT
+
+An HHL circuit for the numerical example is then built
+and shown in Figure 3. We will then walk through the
+circuit using numerical substitution.
+E. NUMERICAL SUBSTITUTION
+
+The algorithm begins with
+|Ψ0 i = |0ib ⊗ |00ic ⊗ |0ia = |0000i
+
+(49)
+
+is known to be equivalent to RY(θ) rotation,
+X-gate is then applied to convert |0ib to |1ib with
+
+RY(θ) =
+
+cos
+sin
+
+θ
+2
+θ
+2
+
+
+
+− sin
+cos θ2
+
+θ
+2
+
+
+(42)
+
+ 
+with θ = 2 arcsin λ̃1 . One can check this by multiplyj
+ing RY(θ) to |0ia .
+
+  
+
+cos θ2  − sin θ2
+1
+RY(θ) |0ia =
+0
+cos θ2
+sin θ2
+ 
+ 
+θ
+θ
+= cos
+|0ia + sin
+|1ia
+(43)
+2
+2
+Therefore, we will establish a function to implement
+this rotation and this function only need to be valid
+when the input are the encoded eigenvalues because
+only encoded eigenvalues have zero magnitudes in the
+c-register as shown in (21). The function is defined as
+ 
+1
+(44)
+c
+where c is the value of the clock qubits and c1 c0 is its
+binary form.
+Since only |λ̃j i has non-zero amplitude in (21), we only
+need to set up (44) such that it is correct for |ci=|01i
+and |10i, namely
+θ(c) = θ(c1 c0 ) = 2 arcsin
+
+ 
+1
+θ(1) = θ(01) = 2 arcsin
+=π
+1
+ 
+1
+π
+θ(2) = θ(10) = 2 arcsin
+=
+2
+3
+8
+
+(45)
+(46)
+
+|Ψ1 i = X ⊗ I ⊗ I |Ψ0 i = |1000i
+
+(50)
+
+After applying the Hadamard gates to create a superposition among the clock qubits,
+|Ψ2 i = I ⊗ H⊗n ⊗ I |Ψ1 i
+1
+= |1i 2 (|0i + |1i)⊗2 |0i
+22
+1
+= (|1000i + |1010i + |1100i + |1110i)
+2
+
+(51)
+
+Before applying the CU3(controlled rotation of ancillary qubit) gates in the bra-ket notation, it will be
+convenient to perform a basis change to the eigenvector
+basis of A. Since |1i = √12 (− |u0 i + |u1 i), we have
+−1
+and b1 = √12 . Therefore,
+b0 = √
+2
+1
+|Ψ2 i = |1i (|000i + |010i + |100i + |110i)
+2
+1
+1
+= √ (− |u0 i + |u1 i) (|000i + |010i + |100i
+2
+2
++ |110i)
+1
+= √ (− |u0 i |000i − |u0 i |010i − |u0 i |100i
+2 2
+− |u0 i |110i + |u1 i |000i + |u1 i |010i
++ |u1 i |100i + |u1 i |110i)
+
+(52)
+
+In the controlled rotation operations, when the corresponding c-register is |kic , a phase change of φj =
+VOLUME 3, 2022
+
+Author et al.:
+
+FIGURE 3. The HHL circuit corresponding to the numerical example built to run in IBM-Q. This circuit is partitioned in the same way as the general HHL
+schematic in Figure 1.
+
+kλj t/2π is added (i.e. multiplied by e2πiφj ) for |uj i. Since
+2
+4
+t = 3π
+4 , λ0 = 3 and λ1 = 3 , we have
+
+Now apply IQFT to the clock qubits, e.g.
+IQFT |10i = IQFT |2i
+
+1
+|Ψ3 i = √ (− |u0 i |000i − e2πiφ0 |u0 i |010i
+2 2
+− e2πi2φ0 |u0 i |100i − e2πi3φ0 |u0 i |110i +
+
+=
+
+2
+2X
+−1
+
+22/2 y=0
+
+e−2πi2y/4 |yi
+
+1
+(|0i − |1i + |2i − |3i
+2
+1
+= (|00i − |01i + |10i − |11i)
+2
+
+=
+
+|u1 i |000i + e2πiφ1 |u1 i |010i
++ e2πi2φ1 |u1 i |100i + e2πi3φ1 |u1 i |110i)
+1
+= √ (− |u0 i |000i − eiλ0 t |u0 i |010i
+2 2
+− ei2λ0 t |u0 i |100i − ei3λ0 t |u0 i |110i +
+
+(55)
+
+Similarly,
+1
+(|00i + |01i + |10i + |11i)
+2
+
+(56)
+
+1
+(|00i − i |01i − |10i + i |11i)
+2
+
+(57)
+
+IQFT |00i =
+
+|u1 i |000i + eiλ1 t |u1 i |010i
++ ei2λ1 t |u1 i |100i + ei3λ1 t |u1 i |110i)
+1
+= √ (− |u0 i |000i − eiπ/2 |u0 i |010i − eiπ |u0 i |100i
+2 2
+− ei3π/2 |u0 i |110i + |u1 i |000i + eiπ |u1 i |010i
++ ei2π |u1 i |100i + ei3π |u1 i |110i)
+1
+= √ (− |u0 i |000i − i |u0 i |010i + |u0 i |100i
+2 2
++ i |u0 i |110i + |u1 i |000i − |u1 i |010i +
+|u1 i |100i − |u1 i |110i)
+
+1
+
+(53)
+
+Before applying IQFT, the terms are regrouped for
+simplicity.
+
+IQFT |01i =
+
+1
+(|00i + i |01i − |10i − i |11i)
+(58)
+2
+Therefore, applying IQFT to |Ψ3 i and substituting
+Eq. (55) to (58),
+IQFT |11i =
+
+|Ψ4 i = IQFT |Ψ3 i
+1
+= √
+4 2
+((− |u0 i + |u1 i)(|00i + |01i + |10i + |11i)+
+(−i |u0 i − |u1 i)(|00i − i |01i − |10i + i |11i)+
+(|u0 i + |u1 i)(|00i − |01i + |10i − |11i)+
+
+1
+|Ψ3 i = √ ((− |u0 i + |u1 i) |00i + (−i |u0 i − |u1 i) |01i
+2 2
++ (|u0 i + |u1 i) |10i + (i |u0 i − |u1 i) |11i) |0i (54)
+VOLUME 3, 2022
+
+(i |u0 i − |u1 i)(|00i + i |01i − |10i − i |11i)) |0i
+1
+= √ (− |u0 i |01i + |u1 i |10i) |0i
+(59)
+2
+9
+
+Author et al.:
+
+It can be seen that after IQFT, the eigenvalues are
+encoded in the clock qubits as |01i and |11i with non−1
+zero amplitudes due constructive interference. b0 = √
+2
+1
+and b1 = √2 . We clearly see the entanglement between
+the b-register and the c-register that |u0 i goes with |01i
+and |u1 i goes with |11i.
+After performing the ancilla qubit rotation,
+
+|Ψ5 i =
+
+1
+2X
+−1
+
+s
+bj |uj i |λ̃j i ( 1 −
+
+C2
+λ̃j
+
+j=0
+
+2 |0i +
+
+C
+|1i)
+λ̃j
+
+r
+
+1
+1
+1
+= − √ |u0 i |01i ( 1 − 2 |0i + |1i)+
+1
+1
+2
+r
+1
+1
+1
+√ |u1 i |10i ( 1 − 2 |0i + |1i)
+(60)
+2
+2
+2
+
+|Ψ6 i =
+
+(61)
+
+Applying QFT to the encoded eigenvalues, we have
+
+=
+=
+
+22/2 y=0
+
+e2πi2y/4 |yi
+
+1
+(|00i − |01i + |10i − |11i)
+2
+
+QFT |01i = QFT |1i
+1
+= (|00i + i |01i − |10i − i |11i)
+2
+
+(62)
+
+(63)
+
+Therefore, applying QFT to |Ψ6 i and substituting
+Eq. (62) to (63), we obtain
+r
+
+8
+1
+1
+(− √ |u0 i (|00i + i |01i − |10i
+5
+2
+2
+1
+1
+− i |11i) |1i + √ |u1 i (|00i − |01i
+2
+2 2
++ |10i − |11i)) |1i
+(64)
+
+|Ψ7 i =
+
+For the controlled rotation, the state is multiplied by
+e−iλj t and e−i2λj t if c0 = 1 and c1 = 1, respectively. Since
+10
+
+8
+1
+(− 2 √ |u0 i
+5
+3 2
+(66)
+
+It can be verified that |Ψ9 i is a normalized vector as
+it should be because every operation in the HHL circuit
+is unitary and preserves the norm.
+Equation (66) can be simplified by substituting |u0 i =
+−1
+−1
+−1
+√
+|0i + √
+|1i and |u1 i = √
+|0i + √12 |1i. We obtain,
+2
+2
+2
+r
+1 2
+|Ψ9 i =
+(|0i + 3 |1i) |00i |1i
+(67)
+2 5
+The probability ratio of obtaining |0i and |1i when
+b-register is measured is thus 1 : 9 as expected.
+
+QFT |10i = QFT |2i
+2
+2X
+−1
+
+r
+
+1
++ 4 √ |u1 i) |00i |1i
+3 2
+
+r
+
+1
+
+Finally, by applying Hadamard gate to the clock
+qubits,
+2
+|Ψ9 i =
+3
+
+If the measurement of the ancilla bit is |1i,
+8
+1
+(− √ |u0 i |01i |1i
+5
+2
+1
++ √ |u1 i |10i |1i)
+2 2
+
+e−iλ0 t = −i, e−i2λ0 t = −1, e−iλ1 t = −1, e−i2λ1 t = 1, and
+Nt/2π=3/2
+r
+8
+1
+1
+|Ψ8 i =
+(− √ |u0 i (|00i + |01i + |10i + |11i) |1i
+5
+2
+2
+1
+1
++ √ |u1 i (|00i + |01i + |10i + |11i)) |1i
+2
+2 2
+r
+1
+1
+1 8
+(− √ |u0 i + √ |u1 i)(|00i + |01i
+=
+2 5
+2
+2 2
++ |10i + |11i) |1i
+r
+8
+1
+1
+1 2
+(− 2 √ |u0 i + 4 √ |u1 i)(|00i + |01i
+= ( )
+2 3
+5
+3 2
+3 2
++ |10i + |11i) |1i
+(65)
+
+F. SIMULATION RESULTS
+
+Matlab code implementing the numerical example using
+matrix approach is created and available at [21]. In the
+Matlab code, measurement is not performed (i.e. not
+partical tracing of the matrix). Ψ9 is found to be,
+
+
+−0.4330
+ 0.2500 
+
+
+ 0.0000 
+
+
+−0.0000
+
+
+ 0.0000 
+
+
+−0.0000
+
+
+ 0.0000 
+
+
+ 0.0000 
+
+|ψ9 i = 
+(68)
+ 0.4330 
+
+
+ 0.7500 
+
+
+−0.0000
+
+
+ 0.0000 
+
+
+−0.0000
+
+
+ 0.0000 
+
+
+−0.0000
+0.0000
+VOLUME 3, 2022
+
+Author et al.:
+
+Since |0ic are discarded during the measurement step,
+only |0001i and |1001i are left. Their amplitude ratio is
+0.252 : 0.752 = 1 : 9 as expected.
+The circuit in Fig. 3 is also simulated in the IBM-Q
+system (code available at [21]). Since only the b-register
+and the ancilla qubit are measured, there are only four
+possible outputs as shown in Figure 4. Again, only |1ia
+should be considered. The ratio of the measurement
+probability of |0ib |1ia to |1ib |1ia is 0.063 : 0.564 = 1 :
+8.95, which is close to the expected value.
+
+example is also presented in the bra-ket notation. The
+numerical example echos the analytical derivation to
+help students understand how qubits evolve in this
+important and relatively complex algorithm. A Matlab
+code corresponding to the numerical example is constructed to help understand the algorithm from the matrix point of view. Qiskit circuit of the corresponding circuit which can be simulated in IBM-Q and run on their
+quantum computing hardware is also available. Through
+this self-contained and step-by-step walkthrough, the
+basic concepts in quantum computing are reinforced.
+V. APPENDIX
+1) Hermitian matrix
+
+A Hermitian matrix is a matrix that equals to its adjoint
+matrix (transpose followed by complex conjugation).
+That is, if A is a Hermitian matrix, then it is defined
+as,
+A = A† = (AT )∗
+
+FIGURE 4. Simulation result of the circuit in Figure 3 using IBM − Q. Only
+the MSB | ib , and the LSB | ia are measured.
+
+where AT is the transpose of A.
+In this paper, the matrix, A, in the LPS to be solved
+is assumed to be Hermitian.
+Another example is in (32), where V is Hermitian.
+
+V = u~0 u~1
+!
+=
+
+On the other hand, due to the imperfection and noise
+in a real quantum computer, the hardware execution
+of the same circuit does not give a satisfactory result
+(Figure 5). The ratio of the measurement probability of
+|0ib |1ia to |1ib |1ia is only 0.1422 : 0.3612 = 1 : 2.54.
+
+(V.69)
+
+−1
+√
+2
+−1
+√
+2
+
+−1
+√
+2
+√1
+2
+
+(32)
+
+2) Bra-ket Notation
+
+Bra-ket notation is commonly used in quantum mechanics. A vector ~v is represented as |vi in its ket form. The
+bra form of the vectors forms a dual space to the space
+of the kets. The bra form of ~v is hv|.
+In matrix representation, ket is the complex conjugate
+transpose
+of bra and vice versa. For example, if |vi =
+ 
+
+1
+, then hv| = 1 i.
+−i
+3) Superposition
+
+Superposition or Quantum Superposition is a quantum
+state which is the linear combination of two or more
+basis states. For example, a superposition state can be
+|vi = c1 |1i+c2 |0i , where c1 and c2 are complex number
+and |1i and |0i are basis states. A Hadamard gate is
+a gate commonly used to create a superposition state
+(Appendix V-5).
+4) Basis Transformation and Quantum Gate
+FIGURE 5. Hardware result of the circuit in Figure 3 run in machine
+ibmq_santiago. Only the MSB, | ib and the LSB, | ia are measured.
+
+IV. CONCLUSION
+
+In this paper, we presented the HHL algorithm through a
+step-by-step walkthrough of the derivation. A numerical
+VOLUME 3, 2022
+
+In quantum computing, we only care about the basis
+transformation due to rotation in the hyperspace. The
+transformation is equivalent to the multiplication of
+the basis vectors by a unitary matrix, U, which is
+the transformation matrix. All quantum gates can be
+defined as how the basis vectors are transformed from
+11
+
+Author et al.:
+
+the initial basis vector to the final basis vectors. Usually,
+a quantum gate rotates a basis state into another basis
+state (e.g. the NOT gate) and has its classical counterpart. But there are some gates that rotate a basis state
+to a superposition of two or more basis states. Such gates
+have no classical counterparts. For example, a Hadamard
+gate defines how an initial basis vector is rotated to an
+equal superposition of two basis vectors (Appendix V-5).
+5) Hadamard Gate
+
+The Hadamard gate is a quantum gate that does not
+have a classical counterpart. It rotates the basis state to
+create an equal superposition of the basis states. For a
+1-qubit case, this means it has equal probability (i.e. 12 )
+of measuring |0i and |1i.
+The matrix form of the Hadamard gate is,
+
+
+1 1 1
+√
+(V.70)
+2 1 −1
+ 
+0
+When it is applied on the basis state |1i, which is
+1
+in matrix form, we have,
+
+ 
+1 1 1
+0
+=√
+(V.71)
+2 1 −1  1
+1
+1
+(V.72)
+=√
+2 −1
+which can also be represented in bra-ket form as,
+|0i − |1i
+√
+2
+
+(V.73)
+
+In this paper, Hadamard gates are applied in clock
+qubit to create superposition from |ψ1 i to |ψ2 i. For
+example, in (11),
+|Ψ2 i = I⊗nb ⊗ H⊗n ⊗ I |Ψ1 i
+
+(11)
+
+where |ψ2 i is obtained by applying tensor product of
+identity gates and an n-qubit Hadamard gate to |ψ1 i.
+The identity gates are applied to the b-register and the
+ancilla qubit while the Hadamard gate is applied to the
+clock qubits. In this equation, the n-qubit Hadamard
+gate is represented as H⊗n , i.e. the tensor product of n
+1-qubit Hadamard gates.
+6) Entanglement
+
+Entanglement refers to the quantum state of a 2- or
+more-qubit system that cannot be expressed as a tensor
+product of the individual qubit. This is an important
+feature that quantum computing uses often. As an
+example,
+1
+|Ψi = √ (|00i + |11i)
+2
+
+where the b-register and the c-register are entangled
+and |u0 i (|u1 i) always appears with |01i (|10i) after the
+measurement.
+If the b-register were not entangled with the c-register,
+we have
+r
+|Ψ6 i =
+
+8
+1
+1
+(− √ |u0 i + √ |u1 i)
+5
+2
+2 2
+
+(V.75)
+
+−1
+−1
+By substituting |u0 i = √
+|0i + √
+|1i and |u1 i
+2
+2
+−1
+1
+√ |0i + √ |1i and after simplification, we have
+2
+2
+
+r
+|Ψ6 i =
+
+=
+
+8
+1 −1
+−1
+1 −1
+(− √ ( √ |0i + √ |1i) + √ ( √ |0i +
+5
+2 2
+2
+2 2 2
+
+1
+√ |1i))
+2
+r
+8 1
+3
+( |0i + |1i)
+=
+5 4
+4
+
+(V.76)
+
+This is the same as (67). The probability of measuring
+|0i and |1i has the ratio of 1:9 as expected.
+However, when there is entanglement, the probability
+of measuring |0i and |1i would not be 1:9 because the
+previous grouping is impossible.
+r
+|Ψ6 i =
+
+1 −1
+−1
+1 −1
+8
+(− √ ( √ |0i + √ |1i) |01i + √ ( √ |0i
+5
+2 2
+2
+2 2 2
+
+1
++ √ |1i)) |10i
+2
+
+(V.77)
+
+7) Controlled Operation
+
+Controlled operation requires more than one qubit. For
+a 2-qubit controlled gate, an operation is applied to a
+qubit (the target qubit), if the value of the controlling
+qubit is 1 in the basis vector.
+For example, in Figure 2, |bi is the target qubit and
+n−1
+|cn−1 i is the controlling qubit. The operation of U2
+is applied to |bi only if |cn−1 i is 1 in the basis state (e.g.
+|bcn−1 · · ·i = |01 · · ·i.
+In general, the controlled version of a unitary gate,
+U0 , can be implemented using the following equation if
+the LSB is the controlling qubit.
+C − U0 = I ⊗ |0i h0| + U0 ⊗ |1i h1|
+
+(40)
+
+(V.74)
+
+is an entangled state. It cannot be expressed as a tensor
+product of two individual qubit states.
+12
+
+In this paper, after the ancilla bit rotation, we have
+r
+8
+1
+1
+|Ψ6 i =
+(− √ |u0 i |01i |1i + √ |u1 i |10i |1i) (61)
+5
+2
+2 2
+
+which literally means that if the controlling qubit is
+0, Identity gate is applied to the target qubit (MSB).
+Otherise, U0 is applied to the target qubit.
+VOLUME 3, 2022
+
+Author et al.:
+
+Hamiltonian in a unitary gate. For example, in this
+paper, Eq. (17) shows that
+
+8) Eigenvalue and Eigenvector
+
+When a non-zero n × n matrix A is applied to an n~ and has the following relationship,
+dimensional vector V
+~ = λV
+~
+AV
+
+U = eiAt
+
+(V.78)
+
+where it encodes matrix A as the Hamiltonian of the
+unitary gate U. Matrix A needs to be Hermitian as
+it is used to represent the Hamiltonian (the energy)
+of the system. However, A does not need to be
+unitary and U will be unitary due to its definition
+in (17).
+
+~ and λ are
+where λ is a scalar, then, by definition, V
+the eigenvector and eigenvalue of A, respectively. This is
+similar to (3), where the matrix A is expressed as a linear
+combination of the outer products of its eigenvectors,
+|ui i hui |.
+A=
+
+b −1
+2n
+X
+
+10) Discrete Fourier Transform (DFT)
+
+λi |ui i hui |
+
+(3)
+
+i=0
+
+This can be checked by applying A to its eigenvector
+|uj i,
+A |uj i =
+=
+
+b −1
+2n
+X
+
+i=0
+b −1
+2n
+X
+
+λi |ui i hui | |uj i
+
+
+λi |ui i δij
+
+which meets the definition in Eq. (V.78).
+9) Different Types of Encoding
+
+The three common types of encodings are explained
+here.
+• Basis Encoding- Basis encoding converts classical
+information such as numbers or matrix to quantum
+information in the form of basis states. For example,
+10
+
+quantum state
+−−−−−−−−−−→
+
+|10i
+
+ 
+ 
+2
+10
+x=
+binary
+quantum state |1011i
+3 −−−−→ 11 −−−−−−−−−−→
+(V.80)
+•
+
+Amplitude Encoding- Amplitude encoding encodes
+the information as the coefficients of the basis
+vectors. For example, for
+ 
+v0
+~v =
+(V.81)
+v1
+which is assumed to be normalized (|v| = 1), it can
+be encoded as in the following quantum state,
+|vi = v0 |0i + v1 |1i
+
+(V.82)
+
+where v0 and v1 become the coefficients of the basis
+states, |0i and |0i, respectively. In the main text,
+Eq. (9) shows how the values of the components of
+vector |bi are encoded using amplitude encoding.
+• Hamiltonian Encoding- One type of the Hamiltonian encoding is to encode the matrix as the
+VOLUME 3, 2022
+
+~ =
+Y
+
+
+~
+ΩX
+
+
+−0·0
+
+ω
+y0
+−1·0
+
+ y1 
+1  ω
+
+
+ ..  = √ 
+..
+ . 
+N
+.
+yN−1
+ω −(N−1)·0
+
+
+x0
+ x1 
+
+
+· . 
+ .. 
+
+= λj |uj i
+
+binary
+−−−−→
+
+The discrete Fourier Transform (DFT) transforms an N~ to another N-dimensional vector
+dimensional vector X
+~
+Y. The transformation matrix Ω contains the powers of
+the N-th root of unity, ω = ei2π/N . The transformation
+is represented as,
+
+(V.79)
+
+i=0
+
+x=2
+
+(17)
+
+−0·(N−1)
+
+
+
+···
+···
+..
+.
+
+ω
+ω −1·(N−1)
+..
+.
+
+···
+
+ω −(N−1)·(N−1)
+
+
+
+
+
+
+(V.83)
+
+xN−1
+11) Inverse Quantum Fourier Transform (IQFT) and
+Quantum Fourier Transform(QFT)
+
+Mathematically, IQFT is similar to DFT (See Appendix V-10). The transformation matrix, UI , is N × N
+for an N-dimensional Hilbert space. Therefore, N = 2n
+for an n-qubit system. Eq. (V.83) becomes
+|Yi = UI |Xi
+
+(V.84)
+
+and UI has the same expression as Ω in DFT.
+
+
+ω −0·0
+···
+ω −0·(N−1)
+−1·0
+···
+ω −1·(N−1) 
+1 
+ ω
+
+UI = √ 
+ (V.85)
+..
+..
+.
+.
+
+
+N
+.
+.
+.
+−(N−1)·0
+−(N−1)·(N−1)
+ω
+··· ω
+Note that in some literature, e.g. [19], this form of
+IQFT is called QFT. |Xi and |Yi are the quantum
+states/vectors in the N-dimensional Hilbert space. IQFT
+can be treated as the rotation of |Xi to |Yi.
+If |Xi is a basis vector |ki, applying IQFT to |ki using
+Eq. (V.85), we have
+N−1
+
+1 X −jk
+ω
+|ji
+UI |ki = √
+N j=0
+
+(V.86)
+
+This is the equation used often in this paper. It tells
+us that by applying IQFT to a basis vector, the basis
+13
+
+Author et al.:
+
+vector is rotated to a superposition of all basis vectors
+weighted by the powers of the N-th root of unity.
+For example, in (55) in the main text,
+IQFT |10i = IQFT |2i
+=
+
+2
+2X
+−1
+
+1
+
+22/2 y=0
+
+FIGURE 6. Implementation of a 2qubit inverse quantum Fourier
+transformation.
+
+e−2πi2y/4 |yi
+
+1
+(|0i − |1i + |2i − |3i
+2
+1
+= (|00i − |01i + |10i − |11i)
+2
+=
+
+(55)
+
+where N = 22 = 4, k = 2, j = y in (V.86) is used.
+The basis state |10i becomes a superposition of all other
+basis states after IQFT.
+Another more complex example is the general equation,in (15), for the IQFT in Figure 1.
+
+In general, the phase shift angle is φ = −2π
+2r , r − 1
+is the distance between the controlling qubit and the
+target qubit. For the 2-qubit IQFT case, there is only
+one controlled phase shift gate and r = 2 and this results
+in the phase φ = −π
+2 .
+For QFT, the circuit is the same as the IQFT, but
+the phase shift is negated, i.e. φ = 2π
+2r . This can be
+appreciated by the fact that the elements in the IQFT
+and QFT have opposition signs in (V.85) and (V.87),
+respectively.
+
+n
+
+2 −1
+1 X 2πiφk
+e
+|ki) |0ia
+|Ψ4 i = |bi IQFT( n
+2 2 k=0
+
+13) Gaussian elimination method
+
+Here, Gaussian elimination is demonstrated by solving
+(1) using the numerical example in Section III.
+
+n
+
+2 −1
+1 X 2πiφk
+= |bi n
+e
+(IQFT |ki) |0ia
+2 2 k=0
+
+= |bi
+
+1
+2n
+
+n
+2X
+−1
+
+n
+2X
+−1
+
+e2πiφk (
+
+e−2πiyk/N |yi) |0ia
+
+
+
+n
+
+−1
+2X
+−1 2X
+1
+e2πik(φ−y/N) |yi |0ia
+|bi
+2n
+y=0
+
+(15)
+
+k=0
+
+Here, IQFT is applied to the c-register which is a
+superposition of basis states, |ki. Using the distribution
+law of matrix operations, IQFT is applied to individual
+|ki and (V.86) is used with y = j and N = 2n .
+QFT is the inverse of IQFT and can be treated as the
+rotation of the basis. The rotation matrix is given by
+
+
+1
+1
+1 
+
+UQ = √  1
+.
+N
+ ..
+1
+
+1
+ω1
+ω2
+..
+.
+
+···
+···
+···
+..
+.
+
+1
+
+
+
+ω (N−1)
+ω 2(N−1)
+..
+.
+
+
+
+
+
+
+
+
+ω (N−1)
+
+···
+
+ω (N−1)(N−1)
+
+(V.87)
+
+N−1
+
+(V.88)
+
+It can be shown that UI = U−1
+Q or UI UQ = I.
+12) Implementation of QFT and IQFT
+
+QFT and IQFT are constructed using Hadamard gates,
+controlled phase shift gates, and SWAP gates. Readers
+may refer to other sources for the details (e.g. [19]). Here,
+we show the circuit of a 2-qubit IQFT gate (Fig. 6).
+14
+
+−1
+3
+
+1
+
+
+
+x0
+x1
+
+(1)
+
+
+ 
+0
+=
+1
+
+(V.89)
+
+which is rewritten as an augmented matrix followed by
+Gaussian method of Elimination to solve for x0 and x1 ,
+
+
+
+
+−1
+0
+0
+1 −1
+1
+3
+3
+Row2
+=
+3
+×
+Row2
++
+Row1
+−1
+1 1 −−−−−−−−−−−−−−−−−−−−→ 0 83 3
+3
+
+
+3
+3 −1 0
+Row2 = × Row2
+9
+8−−−−−→ 0 1
+8
+−−−−−−−−
+
+
+
+1
+3 −1 0
+1 0
+Row1
+=
+×
+Row1
++
+Row2
+9
+0 1
+0 1
+3
+8 −
+−−−−−−−−−−−−−−−−−−−→
+This the solution ~x is
+  3
+x0
+= 89
+x1
+8
+
+3
+8
+9
+8
+
+
+
+The complexity of Gaussian Elimination is O(N3 ).
+This is much slower than the classical conjugate gradient
+method (Appendix V-14), to which HHL is compared.
+
+Equivalently,
+1 X jk
+ω |ji
+UQ |ki = √
+N j=0
+
+1
+−1
+3
+
+y=0
+
+k=0
+n
+
+=
+
+A~x = ~b
+
+14) Conjugate Gradient Method
+
+The Conjugate Gradient Method (CGM) solves the LSP
+with a complexity of O(N) and is the fastest known
+classical solver. Therefore, the speed of HHL, which has
+a complexity of O(log(N)), is often compared to the
+speed of CGM [22]. Thus, HHL provides an exponential
+speedup over the fastest known classical method.
+When we solve a system of linear equation, according
+to (Eq.(1)),where A is a matrix, b is a vector and x is to
+VOLUME 3, 2022
+
+Author et al.:
+
+be solved. If A is a 2×2 matrix and b is 2×1 ,then x can
+be solved easily. But is A is a long matrix, for example
+1000, 000, 000 × 1000, 000, 000 and b is 1000, 000, 000 × 1
+vector, and N in this case is 1000, 000, 000. To solve
+x in Classical Gaussian Elimination method we need
+O(N3 ) speed, where O is omega. In Classical Conjugate
+Gradient Method with sparse matrix that contains lots
+of zeros, it will take O(N) speed. And for HHL Quantum
+Algorithm, with sparse matrix, it takes O(log(N)) speed.
+However, according to the paper [24], the speed of
+inner product in HHL Quantum Algorithm is only
+log(mn)/ steps when certain amplitudes is obtained
+and distinguished among other amplitudes, otherwise
+the speed is only quadratically faster than classical
+algorithm.
+To solve (1) in CGM method,
+A~x = ~b
+
+(1)
+
+initial guess of ~x is used as the starting point. The residual is then found and the search direction is determined
+by finding the steepest descent. This is repeated until a
+stable condition is met.
+The residual in the kþsearch is given as,
+Rk = b − A~xk
+
+(V.90)
+
+The readers do not need to understand CGM to
+understand HHL. Interested readers may refer to the
+literature (e.g. [9]) for more details.
+REFERENCES
+[1] P. W. Shor, “Algorithms for quantum computation: discrete
+logarithms and factoring," Proceedings 35th Annual Symposium on Foundations of Computer Science, 1994, pp. 124–134,
+doi: 10.1109/SFCS.1994.365700.
+[2] C. Outeiral, M. Strahm, J. Shi, G. M. Morris, S. C. Benjamin,
+and C. M. Deane, “The prospects of quantum computing
+in computational molecular biology,” WIREs Comput. Mol.
+Sci., 11, e1481 (2021).
+[3] D. J. Egger et al., “Quantum Computing for Finance: Stateof-the-Art and Future Prospects," in IEEE Transactions on
+Quantum Engineering, 1, pp. 1–24, 2020, Art no. 3101724,
+doi: 10.1109/TQE.2020.3030314.
+[4] Arute, F., Arya, K., Babbush, R. et al. Quantum supremacy
+using a programmable superconducting processor. Nature
+574, 505–510 (2019). doi.org/10.1038/s41586-019-1666-5
+[5] Madsen, L.S., Laudenbach, F., Askarani, M.F. et al. Quantum computational advantage with a programmable photonic
+processor. Nature 606, 75–81 (2022). doi.org/10.1038/s41586022-04725-x
+[6] N. David Mermin, "Could Feynman Have Said This?,"
+Physics Today 57 (5), 10 (2004); doi: 10.1063/1.1768652
+[7] A. Harrow, A. Hassidim, and S. Lloyd, "Quantum algorithm
+for linear systems of equations," Phys. Rev. Lett. 103, 150502
+(2009).
+[8] Yudong Cao, Anmer Daskin, Steven Frankel, and Sabre
+Kais, “Quantum circuit design for solving linear systems of
+equations,” Molecular Physics 110, 15–16 (2011).
+[9] R. Chandra, S.C. Eisenstat, and M.H. Schultz, "Conjugate
+Gradient Methods for Partial Differential Equations," in the
+Proceedings of the AICA International Symposium on Computer Methods for Partial Differential Equations, Bethlehem,
+Pennsylvania, June 1975.
+VOLUME 3, 2022
+
+[10] S. Dmitry et al., “The Potential of Quantum Computing and
+Machine Learning to Advance Clinical Research and Change
+the Practice of Medicine.” Missouri medicine 115 (5), 463–467
+(2018).
+[11] Bojia Duan, Jiabin Yuan, Chao-Hua Yu, Jianbang Huang,
+and Chang-Yu Hsieh, "A survey on HHL algorithm: From
+theory to application in quantum machine learning", Physics
+Letters A 384, 126595 (2020).
+[12] Shengbin Wang, Zhimin Wang, Wendong Li, Lixin Fan,
+Zhiqiang Wei, and Yongjian Gu, “Quantum fast Poisson
+solver: the algorithm and complete and modular circuit design," Quantum Information Processing 19, Article number:
+170 (2020).
+[13] H. J. Morrell and H. Y. Wong, "Study of using Quantum
+Computer to Solve Poisson Equation in Gate Insulators,"
+2021 International Conference on Simulation of Semiconductor Processes and Devices (SISPAD), 2021, pp. 69-72, doi:
+10.1109/SISPAD54002.2021.9592604.
+[14] Schleich, P., 2019. How to solve a linear system of
+equations using a quantum computer. [Online]. Available: http://www.acom.rwth-aachen.de/_media/3teaching/
+00projects/schleich.pdf.
+[15] HHL
+Example
+using
+Qiskit.
+[Online].
+Available:
+https://qiskit.org/textbook/ch-applications/hhl_tutorial.html.
+[16] Gadi Aleksandrowicz, et al., (2019). Qiskit: An Opensource Framework for Quantum Computing (0.7.2). Zenodo.
+doi.org/10.5281/zenodo.2562111.
+[17] IBM
+Quantum
+Site.
+[Online].
+Available:
+https://quantumcomputing.ibm.com/.
+[18] Dominic W. Berry, Graeme Ahokas, Richard Cleve, and
+Barry C. Sanders, "Efficient quantum algorithms for simulating sparse Hamiltonians," arXiv:quant-ph/0508139, 2007.
+[19] Hiu Yung Wong, Introduction to Quantum Computing: From
+a Layperson to a Programmer in 30 Steps. Switzerland:
+Springer Nature, 2022, pp. 170. doi.org/10.1007/978-3-03098339-0. ISBN-10: 3030983382.
+[20] Danial Dervovic, Mark Herbster, Peter Mountney, Simone
+Severini, Naïri Usher, and Leonard Wossnig, "Quantum linear systems algorithms: a primer,” arXiv:1802.08227v1.
+[21] Matlab code and Jupyter Notebook, [Online]. Available:
+https://github.com/hywong2/HHL_Example.
+[22] Vandenbrocque, Adrien. "On Quantum Algorithms
+for Solving Linear Systems of Equations."Master’s
+semester
+Project
+I",
+2019.
+[Online].
+Available:
+https://adrienvdb.com/projects-and-reports/.
+[23] National
+Strategic
+Overview
+for
+Quantum
+Information Science Report (National Science and
+Technology
+Council,
+2018).
+[Online].
+Available:
+https://www.quantum.gov/wp-content/uploads/2020/10/
+2018_NSTC_National_Strategic _Overview_QIS.pdf.
+[24] Aaronson,
+S.
+Read
+the
+fine
+print.
+Nature
+Phys
+11,
+291–293
+(2015).
+[Online].
+Available:
+https://doi.org/10.1038/nphys3272
+
+15
+
+

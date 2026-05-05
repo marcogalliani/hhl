@@ -1,0 +1,32 @@
+
+% EXAMPLES OF NEW COMMANDS
+\newcommand{\bea}{\begin{eqnarray}} % Shortcut for equation arrays
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\e}[1]{\times 10^{#1}}  % Powers of 10 notation
+
+%----------------------------------------------------------------------------
+%	ADD YOUR DEFINITIONS AND COMMANDS (be careful of existing commands)
+%----------------------------------------------------------------------------
+
+%->New theorem environments
+%\newtheorem{problem}{Problem}
+%\newtheorem{lemma}{Lemma}
+%->New Math operators
+%argmax, argmin
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\norm}[1]{\| #1 \|}
+\DeclareMathOperator{\Tr}{Tr}
+\newcommand{\trace}[1]{\Tr(#1)}
+\newcommand{\outbrackets}[1]{\langle #1 \rangle}
+\newcommand{\outcurlybrackets}[1]{\{#1\}}
+\DeclareMathOperator{\rk}{rank}
+\newcommand{\rank}[1]{\rk(#1)}
+\DeclareMathOperator{\vectorization}{vec}
+\newcommand{\outbracket}[1]{\langle #1 \rangle}
+
+\newcommand{\cind}{\mathrel{\perp\mspace{-9mu}\perp}}
+
+
+\newtheorem{approach}{Approach}

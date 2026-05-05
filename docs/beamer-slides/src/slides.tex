@@ -1,0 +1,225 @@
+\begin{frame}{General idea}
+
+    Let $Ax=b$ be a linear system with $A$ $N_b \times N_b$ matrix and $x$ and $b$ $N_b$-dimensional vectors.
+
+    Matrix $A$ can be written a linear combination of outer products of its eigenvectors weighted by its eigenvalues:
+    \begin{equation*}
+        A = \sum_i \lambda_i\mathbf{u}_i\mathbf{u}_i^\top
+    \end{equation*}
+
+    The inverse matrix $A^{-1}$ can be expressed as
+    \begin{equation*}
+        A^{-1} = \sum_i \lambda_i^{-1}\mathbf{u}_i\mathbf{u}_i^\top
+    \end{equation*}
+\end{frame}
+
+
+\begin{frame}{HHL: steps}
+    \begin{enumerate}
+        \item State preparation
+        \item Quantum Phase Estimation (QPE)
+        \item Ancilla qubit rotation
+        \item Inverse QPE
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Registers}
+    Little endian convention (righmost qubit is the less significant). Then, from the most significant to the leas significant 
+    \vspace{\baselineskip}
+    \begin{enumerate}
+        \item \textit{b-register}: components of $\mathbf{x},\mathbf{b}$, encoded as amplitudes/coefficients of basis states of the $n_b$-qubits, with $N_b = 2^{n_b}$
+        \item \textit{c-register}: values of the phase of the eigenvalues of $A$ after QPE
+        \item \textit{ancilla}: used for inversion and measurement, discarded in the solution
+    \end{enumerate}
+    \vspace{\baselineskip} 
+    Initial state:
+    \begin{equation*}
+        \ket{\Psi_0} = \ket{0}^{\otimes n_b}\ket{0}^{\otimes n}\ket{0}
+    \end{equation*}
+
+    \framebreak
+
+    \begin{center}
+    \begin{quantikz}
+        \lstick{ancilla qubit} &&&&& \\
+        \lstick{c-registers} &&&&& \\
+        \lstick{b-registers} &&&&& 
+    \end{quantikz}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{State preparation}
+    The state preparation step consists of rotating the qubits in the b-register to have amplitudes corresponding to the coefficients of $\mathbf{b}$ (\textit{amplitude encoding})
+    \begin{equation*}
+        \ket{b} = \beta_0\ket{0} + \beta_1\ket{1} + \dots + \beta_{N_n-1}\ket{N_b-1}
+    \end{equation*}
+    Leading to the updated state:
+    \begin{equation*}
+        \ket{\Psi_1} = \ket{b}_b\ket{0}^{\otimes n}\ket{0}_a
+    \end{equation*}
+
+    \framebreak
+
+    The amplitude encoding is implemented in the following way:
+    \begin{enumerate}
+        \item $\mathbf{b}$ is normalized: $\tilde{\mathbf{b}}$ (amplitudes need to sum to 1 in quantum states)
+        \item $\ket{\tilde{b}} = \tilde{b}_0\ket{0} + \tilde{b}_1\ket{1}_1+ \dots + \tilde{b}_{N_b-1}\ket{N_b-1}$
+    \end{enumerate}
+    \vspace{\baselineskip}
+    Consider the simple example where $\mathbf{b} = (0,1)$. The vector is already normalized and the state preparation circuit corresponds to the following: \\
+    \vspace{\baselineskip}
+    \textbf{Note:} The state preparation step is then specific to each $\mathbf{b}$.
+\end{frame}
+
+\begin{frame}{Quantum Phase Estimation (QPE)}
+    The goal of QPE is to estimate the phase of the eigenvalues of $A$
+    \vspace{\baselineskip}
+    Overview:
+    \begin{enumerate}
+        \item Superposition
+        \item Controlled rotations
+        \item Inverse Quantum Fourier Transforms (IQFT)
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{QPE: Superposition}
+    The goal of this step is to put the clock qubits into an equal superposition annd explore all possible phases simultaneously
+    \begin{align*}
+        \ket{\Psi_2} &= I^{\otimes n_b} \otimes H^{\otimes n} \otimes I \ket{\Psi_1} \\
+        &= \ket{b} \frac{1}{2^{\frac{n}{2}}} (\ket{0}+\ket{1})^{\otimes n} \ket{0}
+    \end{align*}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{QPE: Controlled Rotations}
+    In order to estimate the eigenvalues of $A$, we need it to somehow operate with it within the quantum circuit. As $A$ in non-unitary and gates of a quantum circuit need to be unitary we have to encode $A$ through Hamiltonian encoding, namely we're gonna use the unitary gate
+    \begin{equation*}
+        U = e^{iAt}
+    \end{equation*}
+    \textbf{Interpretations:}
+    \begin{itemize}
+        \item eigenvalue connection: $\text{eig}(U) = e^{i\lambda_i t}$, where $\lambda_i$ are the eigenvalues of $A$
+        \item $A$ energy of the Hamiltonian system
+    \end{itemize}
+
+    \framebreak
+
+    Eigenvalues of $A$ will be stored in the \textit{c-registers}, encoded using \textit{basis encoding}. For this reason, the stored eigenvalues are not exact. 
+    \vspace{\baselineskip}
+    In this section, controlled $U^t$ gates will be applied to $\ket{b}$.
+
+    \framebreak
+
+    \textbf{Motivation:}
+    Assume $\ket{b}$ to be an eigenvector of $U$ with eigenvalues $e^{2\pi i \phi}$. Then
+    \begin{equation*}
+        U \ket{b} = e^{2\pi i \phi} \ket{b}.
+    \end{equation*}
+    When the control quibit is $0$ $\ket{b}$ is not affected, otherwise $U$ is applied to it. This relationship is expressed by 
+    \begin{align*}
+        \ket{\Psi_3} &= \ket{b} \otimes (\frac{1}{2^{\frac{n}{2}}}\bigotimes_{j=1}^n(\ket{0}+e^{2\pi i \psi 2^{n-j}}\ket{1})) \otimes \ket{0}_a \\
+        &= \ket{b} \otimes (\frac{1}{2^{\frac{n}{2}}}\sum_{k=1}^{2^n-1} e^{2\pi i \psi k} \ket{k}) \otimes \ket{0}_a 
+    \end{align*}
+\end{frame}
+
+\begin{frame}{QPE: Inverse Quantum Fourier Transforms I}
+    \vspace{-0.8cm}
+    \begin{align*}
+        \ket{\Psi_4} &= \ket{b} \otimes \mathrm{IQFT}(\frac{1}{2^{\frac{n}{2}}}\sum_{k=0}^{2^{n-1}}(e^{2\pi i \psi k}\ket{k})) \otimes \ket{0}_a \\
+        &= \ket{b} \otimes (\frac{1}{2^{\frac{n}{2}}}\sum_{k=0}^{2^{n-1}}(e^{2\pi i 
+        \psi k}\mathrm{IQFT}(\ket{k}))) \otimes \ket{0}_a \\
+        &= \ket{b} \otimes (\frac{1}{2^{\frac{n}{2}}}\sum_{k=0}^{2^{n-1}}(e^{2\pi i \psi k}(\frac{1}{\sqrt{N}}\sum_{j=0}^{N-1}e^{ -2\pi ijk/N}\ket{j}))) \otimes \ket{0}_a \\
+        &= \ket{b} \otimes (\frac{1}{2^{\frac{n}{2}}}\sum_{k=0}^{2^{n-1}}(e^{2\pi i \psi k}(\frac{1}{\sqrt{2^n}}\sum_{j=0}^{N-1}e^{ -2\pi ijk/N}\ket{j}))) \otimes \ket{0}_a \\
+        &= \ket{b} \otimes (\frac{1}{2^{n}}\sum_{k=0}^{2^{n-1}}(\sum_{j=0}^{2^n-1}e^{2\pi ik(\phi - j/N)}\ket{j})) \otimes \ket{0}_a
+    \end{align*}
+\end{frame}
+
+\begin{frame}{QPE: Inverse Quantum Fourier Transforms II}
+    Thus, 
+    \begin{equation*}
+        \ket{\Psi_4} = \ket{b} \otimes (\frac{1}{2^{n}}\sum_{k=0}^{2^{n-1}}(\sum_{j=0}^{2^n-1}e^{2\pi ik(\phi - j/N)}\ket{j})) \otimes \ket{0}_a
+    \end{equation*}
+
+    and the following altenatives apply:
+    \begin{itemize}
+        \item if $\phi-j/N = 0$: $\ket{j}$ will have finite amplitude equal to $\sum_{k=0}^{2^n-1}e^0 = 2^n$, \textit{constructive interference}
+        \item otherwise: $\sum_{k=0}^{2^n-1} e^{2\pi ik(\phi - j/N)} = 0$, \textit{destructive interference}
+    \end{itemize}  
+    %Nice geometrical representation of the phenomenon
+\end{frame}
+
+\begin{frame}{QPE: Inverse Quantum Fourier Transforms III}
+    Finally, ignoring the states with zero-amplitude:
+    \begin{align*}
+        \ket{\Psi_4} &= \frac{1}{2^n}\ket{b}\sum_{k=0}^{2^n-1} e^{2\pi ik \cdot 0} \ket{N\phi}\ket{0}_a \\
+        &= \ket{b}\ket{N\phi}\ket{0}_a
+    \end{align*}
+    In this way, the clock qubits are used to represent the phase information of $U$, the accuracy depends on the number of qubits $n$
+\end{frame}
+
+\begin{frame}{QPE: Inverse Quantum Fourier Tranform IV}
+    Since $U$ encodes $A$ through Hamiltonian encoding $U=e^{iAt}$, $U$ is diagonal in the eigenvectors of $A$: 
+    \begin{equation*}
+        U \ket{b} = e^{i\lambda_j t} \ket{u_j}
+    \end{equation*}
+    Equating the latter to $U \ket{b} = e^{2\pi i \phi} \ket{b}$, we get $\phi = \frac{\lambda_j t}{2\pi}$ and
+    \begin{equation*}
+        \ket{\Psi_4} = \ket{u_j}\ket{\frac{N\lambda_j t}{2\pi}}\ket{0}_a
+    \end{equation*}
+    More generally, expressing $\ket{b}$ in the basis formed by the eigenvectors of $A$, we have 
+    \begin{equation*}
+        \sum_{j=0}^{2^n_b-1} b_j\ket{u_j} \ket{\frac{N\lambda_j t}{2\pi}}\ket{0}_a
+    \end{equation*} 
+    As $\lambda_j$ are usually non-integers, $t$ will be selected so that $\frac{N\lambda_j t}{2\pi}$ are integers
+\end{frame}
+
+\begin{frame}{Ancilla qubit}
+    Rotation of the ancilla qubit is performed on the basis of a parameter $C$
+    \begin{equation*}
+        \ket{\Psi_5} = \sum_{j=0}^{2^{n_b}-1} b_j\ket{u_j}\ket{\tilde{\lambda_j}}(\sqrt{1-\frac{C^2}{\tilde{\lambda}_j^2}}\ket{0}_a + \frac{C}{\tilde{\lambda}_j}\ket{1}_a)
+    \end{equation*}
+    Once the ancilla qubit is measured we got two alternatives
+    \begin{itemize}
+        \item if $\ket{0}$: repeat the computation
+        \item if $\ket{1}$: stop the iterations
+    \end{itemize}
+    After such iterations, the state is updated to 
+    \begin{equation*}
+        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} b_j\ket{u_j}\ket{\tilde{\lambda_j}}\frac{C}{\tilde{\lambda}_j}\ket{1}_a
+    \end{equation*}
+\end{frame}
+
+\begin{frame}{Inverse QPE I}
+    \begin{equation*}
+        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}\ket{\tilde{\lambda_j}}\ket{1}_a
+    \end{equation*}
+
+    The \textit{b-register} now stores the result in the desired form with respect to the eigenvector-basis. What we have to do now is to express the \textit{b-register} through basis encoding. Problem is that the latter is entagled with the other qubits making unfeasible to operate such a conversion.
+    \vspace{\baselineskip}
+    The inverse QPE step allows then to disentagle the states allowing to express the \textit{b-register} through basis encoding.
+\end{frame}
+
+\begin{frame}{Inverse QPE II}
+    To do so, QFT is applied to the \textit{c-register} qubits:
+    \begin{align*}
+        \ket{\Psi_7} &= \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2} \sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}\mathrm{QFT}(\ket{\tilde{\lambda_j}})\ket{1}_a \\
+        &= \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2} \sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}(\frac{1}{2^{\frac{n}{2}}}\sum_{y=0}^{2^n-1} e^{2\pi iy\tilde{\lambda}_j/N}\ket{y})\ket{1}_a
+    \end{align*}
+\end{frame}
+
+\begin{frame}{Inverse QPE III}
+    Then controlled rotations with $U^{-1}$ are applied as before
+    \begin{align*}
+        \ket{\Psi_8} &= \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2} \sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}(\frac{1}{2^{\frac{n}{2}}}\sum_{y=0}^{2^n-1} e^{-i\lambda_j ty}e^{2\pi iy\tilde{\lambda}_j/N}\ket{y})\ket{1}_a \\
+        &= \frac{1}{2^{\frac{n}{2}}\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2} \sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}\sum_{y=0}^{2^n-1} \ket{y}\ket{1}_a \\
+        &= \frac{C}{2^{\frac{n}{2}}\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2} \ket{x}\sum_{y=0}^{2^n-1} \frac{1}{2^{\frac{n}{2}}}\ket{y}\ket{1}_a
+    \end{align*}
+\end{frame}
+
+\begin{frame}{Inverse QPE IV}
+    The clock-qubits and \textit{b-registers} are now unentagled. By applying the Hadamard gates n the clock qubits we have
+    \begin{align*}
+        \ket{\Psi_9} &= \frac{C}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N}{\tilde{\lambda}_j}|^2} \ket{x}_b \ket{0}_c^{\otimes n}\ket{1}_a
+    \end{align*}
+    where the solution $\ket{x}$ is stored in the \textit{b-registers} successfully.
+\end{frame}
