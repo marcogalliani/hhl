@@ -3,4 +3,4 @@
 # environmental variables
 .env
 # pycahce
-__pychace__/
+__pycache__/
