@@ -1,4 +1,6 @@
+# MacOS files
 .DS_Store
-
 # environmental variables
 .env
+# pycahce
+__pychace__/
