@@ -1,15 +1,15 @@
 \begin{frame}{What is the HHL algorithm?}
 
     \iconcite{Harrow_2009} \\
-    Let $Ax = b$ a linear system, $A\in\mathbb{R}^{N_b \times N_b}, \mathbf{b} \in \mathbb{R}^{N_b}$
+    Let $Ax = b$ a linear system, $A\in\mathbb{R}^{N_b \times N_b}, b \in \mathbb{R}^{N_b}$
     \vspace{\baselineskip}
     \begin{itemize}
         \item \textbf{Input limitations:} $A$ sparse and hermitian
         \item \textbf{Output limitations:}
-        \begin{itemize}
-            \item HHL \textbf{does not} actually compute $x$ (\textit{amplitude encoding})
-            \item HHL computes a \textit{feature} of $x$, e.g., $x^\top M x$ 
-        \end{itemize}
+            HHL \textbf{does not} actually compute $x$ (\textit{amplitude encoding})
+            \begin{equation*}
+                \ket{x} = \sum_{j=0}^{N_b-1} x_j \ket{j}
+            \end{equation*}
         \item \textbf{Logarithmic scaling in $N_b$:} \\ 
         \begin{equation*}
             \mathcal{O}(\log N_b \kappa^2/\epsilon) \quad \text{vs} \quad \mathcal{O}(N_b \kappa)
@@ -19,16 +19,16 @@
 \end{frame}
 
 \begin{frame}{Basic idea}
-    Given the eigenvalue decomposition (EVD) of the matrix, $A = \sum_i \lambda_i\mathbf{u}_i\mathbf{u}_i^\top$, its inverse can be computed as
+    Given the eigenvalue decomposition (EVD) of the matrix, $A = \sum_i \lambda_i{u}_i{u}_i^\top$, its inverse can be computed as
     \begin{equation*}
-        A^{-1} = \sum_i \lambda_i^{-1}\mathbf{u}_i\mathbf{u}_i^\top
+        A^{-1} = \sum_i \lambda_i^{-1}{u}_i{u}_i^\top
     \end{equation*}
-    Thus, if we rewrite $\mathbf{b}$ in the eigenvector basis, $\mathbf{b} = \sum_i \beta_i \mathbf{u}_i$, $\mathbf{x}$ will be
+    Thus, if we rewrite ${b}$ in the eigenvector basis, ${b} = \sum_i \beta_i {u}_i$, ${x}$ will be
     \begin{align*}
-        \mathbf{x} 
-        = A^{-1}\mathbf{b}
-        = \sum_i \lambda_i^{-1}\mathbf{u}_i\mathbf{u}_i^\top \mathbf{b}
-        = \sum_i \lambda_i^{-1} \beta_i \mathbf{u}_i
+        {x} 
+        = A^{-1}{b}
+        = \sum_i \lambda_i^{-1}{u}_i{u}_i^\top {b}
+        = \sum_i \lambda_i^{-1} \beta_i {u}_i
     \end{align*}
 \end{frame}
 
@@ -36,8 +36,8 @@
     \only<1>{
         Registers:
         \begin{itemize}
-        \item \textit{b-register}: components of $\mathbf{b}, \mathbf{x}$, (\textit{amplitude encoding}), $n_b$-qubits, with $N_b = 2^{n_b}$
-        \item \textit{c-register}: phase of the eigenvalues of $A$
+        \item \textit{b-register}: components of ${b}, {x}$, (\textit{amplitude encoding}), $n_b$ qubits, with $N_b = 2^{n_b}$
+        \item \textit{c-register}: phase of the eigenvalues of $A$, $n_c$ qubits, $N_c = 2^{n_c}$
         \item \textit{ancilla}: inversion and measurement
     \end{itemize}
     }
@@ -75,13 +75,13 @@
             &
             \gate[2,style={fill=blue!10}]{\text{QPE}(e^{iAt})} &
             \ctrl{-1} &
-            \gate[2,style={fill=blue!10}]{\text{QPE}^{\dagger}(e^{-iAt})} &
+            \gate[2,style={fill=blue!10}]{\text{QPE}^{\dagger}(e^{iAt})} &
             \rstick{$\ket{0}$} \\
 
         % Input/Output register (multi-qubit bundle)
         \lstick{b-reg} &
             \qwbundle{n_b} &
-            \gate[style={fill=green!20}]{\mathbf{b}\text{-enc}} &
+            \gate[style={fill=green!20}]{{b}\text{-enc}} &
             &
             &
             &
@@ -91,10 +91,10 @@
 \end{frame}
 
 \begin{frame}{State preparation}
-    \textbf{State preparation:} rotate the qubits in the b-register to have amplitudes corresponding to the coefficients of $\mathbf{b}$ (\textit{amplitude encoding})
+    \textbf{State preparation:} rotate the qubits in the b-register to have amplitudes corresponding to the coefficients of ${b}$ (\textit{amplitude encoding})
 
     \vspace{\baselineskip}
-    An example: $\mathbf{b} = (0,1), N_b = 2 \implies n_b = 1$
+    A simple example: ${b} = (0,1), N_b = 2 \implies n_b = 1$
 
     \begin{center}
     \begin{quantikz}
@@ -109,9 +109,9 @@
     \vspace{\baselineskip}
     Recall:
     \begin{itemize}
-        \item state preparation step specific to each $\mathbf{b}$ 
-        \item $\mathbf{b}$ needs to be normalized: $\sum_i |\tilde{b}_i|^2 = 1$
-        \item output: $\ket{\Psi_0} = \ket{\mathbf{b}}\ket{0}^{\otimes n_c}\ket{0}$
+        \item state preparation step specific to each ${b}$ 
+        \item ${b}$ needs to be normalized: $\sum_i |\tilde{b}_i|^2 = 1$
+        \item output: $\ket{\Psi_0} = \ket{{b}}\ket{0}^{\otimes n_c}\ket{0}$
     \end{itemize}
 \end{frame}
 
@@ -173,8 +173,8 @@
         \lstick{$\ket{b}$} &
             \qwbundle{n_b} &
             &
-            \gate[style={fill=blue!10}]{U^{2^0}} &
-            \gate[style={fill=blue!10}]{U^{2^1}}&
+            \gate[style={fill=blue!10}]{U^{2^1}} &
+            \gate[style={fill=blue!10}]{U^{2^0}}&
             &
             
     \end{quantikz}
@@ -189,57 +189,111 @@
     \end{enumerate}
 \end{frame}
 
+\begin{frame}{QPE: Superpostion}
+    First step: superimpose the qubits:
+    \begin{equation*}
+        \ket{\Psi_2} = \ket{b} \frac{1}{2^{\frac{n_c}{2}}} (\ket{0}+\ket{1})^{\otimes n} \ket{0}_a
+    \end{equation*}
+    This is a prerequisite to exploit \textit{phase kickback} in subsequent steps
+\end{frame}
+
 \begin{frame}[allowframebreaks]{QPE: Controlled Rotations}
 
-    After the superposition:
+    For the moment, let's assume $\ket{b}$ eigenvector of $U$ with eigenvalue $e^{i2\pi \phi}$:
     \begin{equation*}
-        \ket{\Psi_2} = \ket{b} \frac{1}{2^{\frac{n_c}{2}}} (\ket{0}+\ket{1})^{\otimes n} \ket{0}
+        U \ket{b} = e^{i2\pi \phi} \ket{b}
     \end{equation*}
 
-    \vspace{\baselineskip}
-
-    For the moment, let's assume $\ket{b}$ eigenvector of $U$ with eigenvalue $e^{2\pi i \phi}$ (we can always express $\ket{b} = \sum_j \beta_j \ket{u_j}$), then:
+    Recall that we can always express $\ket{b}$ in terms of the basis of eigenvectors of $U$
     \begin{equation*}
-        U \ket{b} = e^{2\pi i \phi} \ket{b}
+        \ket{b} = \sum_j \beta_j \ket{u_j}
     \end{equation*}
 
     \framebreak
     
     If the control is $0$, $\ket{b}$ is not affected, otherwise $U$ is applied. This is equivalent to (\textit{phase kickback}):
-    %TODO: add U\ket{b} for clarity
     \begin{align*}
-        \ket{\Psi_3} &= \ket{b} \otimes (\frac{1}{2^{\frac{n_c}{2}}} (\ket{0}+e^{2\pi i \phi 2^{n_c-1}}\ket{1}) \otimes \cdots \otimes (\ket{0}+e^{2\pi i \phi 2^{0}}\ket{1})) \otimes \ket{0}_a \\
-        &= \ket{b} \otimes (\frac{1}{2^{\frac{n_c}{2}}}\bigotimes_{j=1}^{n_c}(\ket{0}+e^{2\pi i \phi 2^{n_c-j}}\ket{1})) \otimes \ket{0}_a \\
-        &= \ket{b} \otimes (\frac{1}{2^{\frac{n_c}{2}}}\sum_{k=1}^{2^{n_c}-1} e^{2\pi i \phi k} \ket{k}) \otimes \ket{0}_a 
+        \ket{\Psi_3} 
+        &= (\frac{1}{2^{\frac{n_c}{2}}} (\ket{b}\ket{0}+U^{2^{n_c}-1}\ket{b}\ket{1}) \otimes \cdots \otimes (\ket{0}+U^{2^0}\ket{b}\ket{1})) \otimes \ket{0}_a \\
+        &= \ket{b} \otimes (\frac{1}{2^{\frac{n_c}{2}}} (\ket{0}+e^{i2\pi \phi (2^{n_c}-1)}\ket{1}) \otimes \cdots \otimes (\ket{0}+e^{i2\pi \phi 2^{0}}\ket{1})) \otimes \ket{0}_a \\
+        %&= \ket{b} \otimes (\frac{1}{2^{\frac{n_c}{2}}}\bigotimes_{j=1}^{n_c}(\ket{0}+e^{2\pi i \phi 2^{n_c-j}}\ket{1})) \otimes \ket{0}_a \\
+        &= \ket{b} \otimes (\frac{1}{\sqrt{N_c}}\sum_{k=1}^{N_c-1} e^{i2\pi \phi k} \ket{k}) \otimes \ket{0}_a 
     \end{align*}
-    \textbf{Motivation:} transfer phase information from $U$ to the control-qubits (\textit{c-registers})!
+    \textbf{Motivation:} transfer phase information from $U$ to the \textit{c-registers}!
 \end{frame}
 
-% TODO: maybe add general purpose of IQFT
-\begin{frame}{QPE: Inverse Fourier Transform}
+\begin{frame}{Quantum Fourier Transform}
+    QFT maps a \textbf{state in the computational basis to a state in the Fourier basis}. Let $\ket{x} = \sum_{j=0}^{N_c} x_j \ket{j}$ expressed in the computational basis
+    \begin{equation*}
+        \ket{j} \to U_{\text{QFT}}\ket{j} = \frac{1}{\sqrt{N_c}}\sum_{k=0}^{N_c} e^{i2\pi jk /N_c} \ket{k}
+    \end{equation*}
+    leading to $\ket{x}=\sum_{j=0}^{N_c} x_j \ket{j} = \sum_j x_j QFT(\ket{j})$ expressed in the fourier basis. Unitary matrix representation:
+    \begin{equation*}
+        U_{\text{QFT}} = \frac{1}{\sqrt{N_c}} 
+        \begin{bmatrix}
+            1 & \ldots & 1 \\
+            1 & \ldots & e^{i2\pi (N_c-1)/ N_c} \\
+            \vdots & \ddots & \vdots \\
+            1 & \ldots & e^{i2\pi (N_c-1)(N_c-1)/ N_c}
+        \end{bmatrix}
+    \end{equation*}
+\end{frame}
+
+\begin{frame}{QPE: Inverse Quantum Fourier Transform}
+    Observe that
+    \begin{equation*}
+        \ket{\Psi_3} = \ket{b} \otimes (\frac{1}{\sqrt{N_c}}\sum_{k=0}^{N_c-1} e^{i2\pi \phi k } \ket{k}) \otimes \ket{0}_a 
+    \end{equation*}
+    stores phase information ($\ket{N_c\phi}$) in the Fourier basis. Indeed,
+    \begin{equation*}
+        U_{\text{QFT}}\ket{N_c\phi} = \frac{1}{\sqrt{N_c}}\sum_{k=0}^{N_c-1} e^{i2\pi N_c\phi k / N_c} \ket{k}
+    \end{equation*}
+    Thus, $\text{IQFT}(\text{QFT}(\ket{N\phi})) = \ket{N\phi}$
     
 \end{frame}
 
+\begin{comment}
 
-\begin{frame}{QPE: Inverse Fourier Transform}
+\begin{frame}{QPE: Inverse Quantum Fourier Transform}
+    Inverse Quantum Fourier Transform (IQFT), matrix:
+    \begin{equation*}
+        U_{\text{IQFT}} = \frac{1}{\sqrt{N_c}} 
+        \begin{bmatrix}
+            1 & \ldots & 1 \\
+            1 & \ldots & e^{-i2\pi (N_c-1)/ N_c} \\
+            \vdots & \ddots & \vdots \\
+            1 & \ldots & e^{-i2\pi (N_c-1)(N_c-1)/ N_c}
+        \end{bmatrix}
+    \end{equation*}
+
+    Given a basis vector $\ket{k}$:
+    \begin{equation*}
+        U_{\text{IQFR}}\ket{k} = \frac{1}{\sqrt{N_c}}\sum_{j=0}^{N_c} e^{i2\pi jk /N_c} \ket{j}
+    \end{equation*}
+
+    \textbf{Motivation:} Map states in the Fourier basis to the computational basis
+\end{frame}
+
+
+\begin{frame}{QPE: Inverse Quantum Fourier Transform}
     To extract the phase information from the \textit{c-registers} of $\ket{\Psi_3}$, IQFT is applied:
     \begin{align*}
-        \mathrm{IQFT}(\frac{1}{2^{\frac{n_c}{2}}}\sum_{k=0}^{2^{n_c-1}}(e^{2\pi i \phi k}\ket{k})) &=  \frac{1}{2^{\frac{n_c}{2}}}\sum_{k=0}^{2^{n_c-1}}(e^{2\pi i \phi k}\mathrm{IQFT}(\ket{k})) \\
-        &= \frac{1}{2^{\frac{n_c}{2}}}\sum_{k=0}^{2^{n_c-1}}(e^{2\pi i \psi k}(\frac{1}{\sqrt{2^{n_c}}}\sum_{j=0}^{N_c-1}e^{ -2\pi ijk/N_c}\ket{j})) \\
-        &= \frac{1}{2^{n_c}}\sum_{k=0}^{2^{n_c-1}}(\sum_{j=0}^{2^{n_c}-1}e^{2\pi ik(\phi - j/N_c)}\ket{j})
+        \mathrm{IQFT}(\frac{1}{\sqrt{N_c}}\sum_{k=0}^{N_c-1}(e^{i2\pi \phi k}\ket{k})) &=  \frac{1}{\sqrt{N_c}}\sum_{k=0}^{N_c-1}(e^{i2\pi \phi k}\mathrm{IQFT}(\ket{k})) \\
+        &= \frac{1}{\sqrt{N_c}}\sum_{k=0}^{2^{n_c-1}}(e^{i2\pi \phi k}(\frac{1}{\sqrt{N_c}}\sum_{j=0}^{N_c-1}e^{ -i2\pi jk/N_c}\ket{j})) \\
+        &= \frac{1}{N_c}\sum_{k=0}^{N_c-1}(\sum_{j=0}^{N_c-1}e^{i2\pi k(\phi - j/N_c)}\ket{j})
     \end{align*}
 \end{frame}
 
 \begin{frame}{QPE: Inverse Quantum Fourier Transforms}
     
     Given the state before measurement: 
-    $$\frac{1}{2^{n_c}} \sum_{k=0}^{2^{n_c}-1} \left( \sum_{j=0}^{2^{n_c}-1} e^{2\pi i k(\phi - j/N_c)} \ket{j} \right)$$
+    $$\frac{1}{N_c} \sum_{k=0}^{N_c-1} \left( \sum_{j=0}^{N_c-1} e^{i2\pi k(\phi - j/N_c)} \ket{j} \right)$$
     
     The following alternatives apply:
     \vspace{0.2cm}
     \begin{itemize}
-        \item \textbf{Constructive} (if $\phi - j/N_c = 0$): Amplitude proportional to $\sum e^0 = 2^{n_c}$
-        \item \textbf{Destructive} (otherwise): Amplitude cancels since $\sum e^{2\pi i k(\dots)} = 0$
+        \item \textbf{Constructive} (if $\phi - j/N_c = 0$): Amplitude proportional to $\sum e^0 = 2^{n_c} = N_c$
+        \item \textbf{Destructive} (otherwise): Amplitude cancels since $\sum e^{i2\pi k(\dots)} = 0$
     \end{itemize}  
     
     
@@ -308,16 +362,17 @@
 \begin{frame}{QPE: Inverse Quantum Fourier Transforms}
     Finally, ignoring the states with zero-amplitude:
     \begin{align*}
-        \ket{\Psi_4} &= \frac{1}{2^n}\ket{b}\sum_{k=0}^{2^n-1} e^{2\pi ik \cdot 0} \ket{N_c\phi}\ket{0}_a \\
+        \ket{\Psi_4} &= \frac{1}{N_c}\ket{b}\sum_{k=0}^{N_c-1} e^{2\pi ik \cdot 0} \ket{N_c\phi}\ket{0}_a \\
         &= \ket{b}\ket{N_c\phi}\ket{0}_a
     \end{align*}
     The \textit{c-registers} qubits are used to represent the phase information of $U$!
 \end{frame}
+\end{comment}
 
 \begin{frame}{QPE: Inverse Quantum Fourier Tranform}
     Recap:
     \begin{itemize}
-        \item We assumed: $\ket{b}$ eigenvector of $U$ with eigenvalue $e^{2\pi i \phi}$
+        \item We assumed: $\ket{b}$ eigenvector of $U$ with eigenvalue $e^{i2\pi \phi}$
         \item $U$ encodes $A$ as $U = e^{iAt}$, so that $U\ket{b} = e^{i\lambda_j t} \ket{b}$
     \end{itemize}
 
@@ -326,27 +381,22 @@
     \begin{equation*}
         \ket{\Psi_4} = \ket{u_j}\ket{\frac{N_c \lambda_j t}{2\pi}}\ket{0}_a
     \end{equation*}
-\end{frame}
 
-\begin{frame}{QPE: Inverse Fourier Transform V}
     More generally, writing $\ket{b} = \sum_j \beta_j \ket{u_j}$ 
     \begin{equation*}
-        \ket{\Psi_4} = \sum_{j=0}^{2^{n_b}-1} b_j\ket{u_j} \ket{\frac{N_c\lambda_j t}{2\pi}}\ket{0}_a
+        \ket{\Psi_4} = \sum_{j=0}^{2^{n_b}-1} \beta_j\ket{u_j} \ket{\frac{N_c\lambda_j t}{2\pi}}\ket{0}_a
     \end{equation*} 
-    % TODO: check the statement about the params
-    \textbf{Note:} $\ket{\frac{N_c\lambda_j t}{2\pi}}$ encoded through basis-encoding. $t, N_c$ to make the latter integers
 \end{frame}
 
-
 \begin{frame}{Ancilla qubit}
-    Rotation of the ancilla qubit: eigenvalue inversion, depends on a parameter $C$
+    Define $\tilde{\lambda}_j = \frac{N_c\lambda_j t}{2\pi}$
     \begin{equation*}
-        \ket{\Psi_5} = \sum_{j=0}^{2^{n_b}-1} b_j\ket{u_j}\ket{\tilde{\lambda_j}}(\sqrt{1-\frac{C^2}{\tilde{\lambda}_j^2}}\ket{0}_a + \frac{C}{\tilde{\lambda}_j}\ket{1}_a)
+        \ket{\Psi_5} = \sum_{j=0}^{2^{n_b}-1} \beta_j\ket{u_j}\ket{\tilde{\lambda_j}}(\sqrt{1-\frac{C^2}{\tilde{\lambda}_j^2}}\ket{0}_a + \frac{C}{\tilde{\lambda}_j}\ket{1}_a)
     \end{equation*}
-
+    Rotation of the ancilla qubit: eigenvalue inversion, depends on a parameter $C$. 
 \end{frame}
-\begin{frame}{Ancilla qubit}
 
+\begin{frame}{Ancilla qubit}
     \begin{columns}
     \begin{column}{0.5\textwidth}
         Ry-gates: 
@@ -359,7 +409,7 @@
         \end{align*}
         and angle 
         \begin{equation*}
-            \theta_j = \arcsin(\frac{C}{\lambda_j})
+            \theta_j = \arcsin(\frac{C}{\tilde{\lambda}_j})
         \end{equation*}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -408,12 +458,74 @@
         \end{tikzpicture}
         \end{center}
     \end{column}
-    
+
     \end{columns}
-
-    % TODO: circuit to implement rotation 
-
 \end{frame}
+\begin{frame}{Ancilla Qubit}
+    
+    Implementation: Map each possible state of the \textit{c-register} to $\ket{1\dots1}$ and relate it to its specific rotation.
+    
+    \vspace{0.2cm}
+    % Moving the large math equation out of the circuit saves massive horizontal space
+    Before rotation: $\sum_j \beta_j\ket{u_j}_b \ket{\tilde{\lambda}_j}_c \ket{0}_a$
+    \vspace{0.1cm}
+    
+    \begin{figure}[htpb]
+        \centering
+        \begin{quantikz}[column sep=0.4cm, row sep=0.3cm]
+            % Ancilla Qubit
+            \lstick{$\ket{0}_a$} & 
+                \qw & 
+                \gate[style={fill=blue!10}]{R_y(\theta_1)} & 
+                \qw & 
+                \qw & 
+                \gate[style={fill=blue!10}]{R_y(\theta_2)} & 
+                \qw & 
+                \gate[style={fill=blue!10}]{R_y(\theta_3)} & 
+                \qw \\
+
+            % Clock Register LSB (c_0)
+            \lstick{$\ket{c_0}$} & 
+                \qw & 
+                \ctrl{-1} & 
+                \qw & 
+                \gate[style={fill=blue!10}]{X} & 
+                \ctrl{-1} & 
+                \gate[style={fill=blue!10}]{X} & 
+                \ctrl{-1} & 
+                \qw \\
+
+            % Clock Register MSB (c_1)
+            \lstick{$\ket{c_1}$} & 
+                \gate[style={fill=blue!10}]{X} & 
+                \ctrl{-2} & 
+                \gate[style={fill=blue!10}]{X} & 
+                \qw & 
+                \ctrl{-2} & 
+                \qw & 
+                \ctrl{-2} & 
+                \qw \\
+                
+            % b-register (passes through untouched)
+            \lstick{$\ket{b}$} & 
+                \qw & 
+                \qw & 
+                \qw & 
+                \qw & 
+                \qw & 
+                \qw & 
+                \qw & 
+                \qw
+        \end{quantikz}
+    \end{figure}
+    
+    \vspace{-0.2cm}
+    \begin{center}
+        \textit{Only the rotations related to the encoded $\tilde{\lambda}_j$ will trigger.}
+    \end{center}
+    
+\end{frame}
+
 \begin{frame}{Ancilla qubit}
 
     Once the ancilla qubit is measured we got two alternatives
@@ -424,31 +536,56 @@
     \vspace{\baselineskip}
     After that the state is updated to 
     \begin{equation*}
-        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N_c}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} b_j\ket{u_j}\ket{\tilde{\lambda_j}}\frac{C}{\tilde{\lambda}_j}\ket{1}_a
+        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{\beta_j N_c}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} \beta_j\ket{u_j}\ket{\tilde{\lambda_j}}\frac{C}{\tilde{\lambda}_j}\ket{1}_a
     \end{equation*}
 \end{frame}
 
-\begin{frame}{Inverse QPE I}
-    \begin{equation*}
-        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N_c}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}\ket{\tilde{\lambda_j}}\ket{1}_a
-    \end{equation*}
-
-    Issues:
+\begin{frame}{Hyperparameters selection}
+    Three hyperparameters: $(n_c,t,C)$. To set them:\\
+    \vspace{\baselineskip}
     \begin{itemize}
-        \item b-registers are not encoded with respect to the canonical basis
-        \item b-registers and c-registers are entagled
+        \item $(t,n_c)$ determine a discrete grid to estimate the eigenvalues of $A$, $\lambda_j$
+        \item $\ket{0\dots 0}$ cannot store any $\lambda_j$
+        \item $C$ has to be lower than $\min_j \lambda_j$ but as high as possible
     \end{itemize}
 \end{frame}
 
+\begin{frame}{Hyperparameters selection}
+    Recall $\phi = \frac{\lambda_j t}{2\pi}$ with $\phi \in [0,1)$ and that the \textit{c-registers} store $\ket{N_c\phi}$. Then \\
+    \vspace{\baselineskip}
+    \begin{itemize}
+        \item \textbf{Scale:} 
+        \begin{equation*}
+            \phi < 1 \implies t < \frac{2\pi}{\max_j \lambda_j}
+        \end{equation*}
+
+        \item \textbf{Sensibility:}
+        \begin{equation*}
+            \Delta \phi = \frac{1}{N_c} \implies \Delta \lambda = \frac{2\pi}{tN_c}
+        \end{equation*}
+    \end{itemize}
+    Moreover, the fact that $\ket{0\dots 0}_c$ cannot store any $\tilde{\lambda}_j$ leads to $t > \frac{2\pi}{N_c\min_j\lambda_j}$ and $N_c > \frac{\max_j \lambda_j}{\min_j \lambda_j}=\kappa$
+\end{frame}
+
+
+\begin{frame}{Inverse QPE}
+    \begin{equation*}
+        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{\beta_j N_c}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} C\frac{\beta_j}{\tilde{\lambda}_j}\ket{u_j}\ket{\tilde{\lambda_j}}\ket{1}_a
+    \end{equation*}
+
+    \textbf{Issue:} \textit{b-registers} storing the solution in the desired form are entangled with the \textit{c-registers}
+    
+\end{frame}
+
 \begin{frame}{Inverse QPE: Quantum Fourier Transform}
-    To do so, QFT is applied to the \textit{c-register} qubits:
+    Firstly, QFT is applied to the \textit{c-register} qubits:
 
     \begin{equation*}
-        \mathrm{QFT}(\ket{\tilde{\lambda_j}}) = \frac{1}{2^{\frac{n}{2}}}\sum_{y=0}^{2^n-1} e^{2\pi iy\tilde{\lambda}_j/N_c}\ket{y}
+        \mathrm{QFT}(\ket{\tilde{\lambda_j}}) = \frac{1}{2^{\frac{n}{2}}}\sum_{k=0}^{N_c-1} e^{2\pi ik\tilde{\lambda}_j/N_c}\ket{k}
     \end{equation*}
     leading to 
     \begin{align*}
-        \ket{\Psi_7} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N_c}{\tilde{\lambda}_j}|^2} \sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}(\frac{1}{2^{\frac{n}{2}}}\sum_{y=0}^{2^n-1} e^{2\pi iy\tilde{\lambda}_j/N_c}\ket{y})\ket{1}_a
+        \ket{\Psi_7} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{\beta_j N_c}{\tilde{\lambda}_j}|^2} \sum_{j=0}^{2^{n_b}-1} C\frac{\beta_j}{\tilde{\lambda}_j}\ket{u_j}(\frac{1}{2^{\frac{n}{2}}}\sum_{k=0}^{N_c-1} e^{2\pi ik\tilde{\lambda}_j/N_c}\ket{k})\ket{1}_a
     \end{align*}
 \end{frame}
 
@@ -456,22 +593,22 @@
     Then controlled rotations with $U^{-1}$ are applied as before
 
     \begin{align*}
-        &\sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}(\frac{1}{2^{\frac{n}{2}}}\sum_{y=0}^{2^n-1} e^{-i\lambda_j ty}e^{2\pi iy\tilde{\lambda}_j/N_c}\ket{y}) \\
-        &= \sum_{j=0}^{2^{n_b}-1} C\frac{b_j}{\tilde{\lambda}_j}\ket{u_j}\sum_{y=0}^{2^n-1} \ket{y} 
-        = C\ket{x}\sum_{y=0}^{2^n-1} \frac{1}{2^{\frac{n}{2}}}\ket{y}
+        &\sum_{j=0}^{2^{n_b}-1} C\frac{\beta_j}{\tilde{\lambda}_j}\ket{u_j}(\frac{1}{2^{\frac{n}{2}}}\sum_{k=0}^{N_c-1} e^{-i\lambda_j tk}e^{2\pi ik\tilde{\lambda}_j/N_c}\ket{k}) \\
+        &= \sum_{j=0}^{2^{n_b}-1} C\frac{\beta_j}{\tilde{\lambda}_j}\ket{u_j}\sum_{k=0}^{N_c-1} \ket{k} 
+        = C\ket{x}\sum_{k=0}^{N_c-1} \frac{1}{2^{\frac{n}{2}}}\ket{k}
     \end{align*}
 
     leading to 
 
     \begin{align*}
-        \ket{\Psi_8} = \frac{C}{2^{\frac{n}{2}}\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N_c}{\tilde{\lambda}_j}|^2} \ket{x}\sum_{y=0}^{2^n-1} \frac{1}{2^{\frac{n}{2}}}\ket{y}\ket{1}_a
+        \ket{\Psi_8} = \frac{C}{2^{\frac{n}{2}}\sum_{j=0}^{2^{n_b}-1} |\frac{\beta_j N_c}{\tilde{\lambda}_j}|^2} \ket{x}\sum_{k=0}^{N_c-1} \frac{1}{2^{\frac{n}{2}}}\ket{k}\ket{1}_a
     \end{align*}
 \end{frame}
 
-\begin{frame}{Inverse QPE IV}
+\begin{frame}{Inverse QPE}
     The clock-qubits and \textit{b-registers} are now unentagled. By applying the Hadamard gates to the clock qubits we have
     \begin{align*}
-        \ket{\Psi_9} &= \frac{C}{\sum_{j=0}^{2^{n_b}-1} |\frac{b_j N_c}{\tilde{\lambda}_j}|^2} \ket{x}_b \ket{0}_c^{\otimes n}\ket{1}_a
+        \ket{\Psi_9} &= \frac{C}{\sum_{j=0}^{2^{n_b}-1} |\frac{\beta_j N_c}{\tilde{\lambda}_j}|^2} \ket{x}_b \ket{0}_c^{\otimes n}\ket{1}_a
     \end{align*}
     where the solution $\ket{x}$ is stored in the \textit{b-registers} successfully.
 \end{frame}
@@ -497,6 +634,21 @@
             1.125 \\
             0.375
         \end{bmatrix}
+    \end{equation*}
+    Expected results: 
+    \begin{equation*}
+        \frac{1}{\sum_{j=0}^{1} x_j^2}
+        \begin{bmatrix}
+            x_0^2 \\
+            x_1^2
+        \end{bmatrix}
+        = 
+        \begin{bmatrix}
+            0.9 \\
+            0.1
+        \end{bmatrix},
+        \quad
+        \mathbb{P}(\text{anc}=\ket{1})= \sum_{j=0}^{1} \left(\frac{C\beta_j}{\lambda_j}\right)^2=0.625
     \end{equation*}
 \end{frame}
 
@@ -537,9 +689,20 @@
 \end{frame}
 
 \begin{frame}{Conclusions}
-    
+    Pros:
+    \begin{itemize}
+        \item A quantum algorithm for linear systems
+        \item Instructive: several subroutines common to many other quantum algorithms (QFT, QPE, Hamiltonian simulation)
+    \end{itemize}
+
+    Cons:
+    \begin{itemize}
+        \item Limited: $x^\top M x$ 
+        \item Deep circuit: noise on real quantum hardware
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{Bibliography}
+    \nocite{*}
     \bibliography{references}
 \end{frame}
