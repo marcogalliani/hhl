@@ -1,0 +1,29 @@
+{
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk (Clean Build)",
+            "tools": [
+                "latexmk-clean"
+            ]
+        }
+    ],
+    "latex-workshop.latex.tools": [
+        {
+            "name": "latexmk-clean",
+            "command": "latexmk",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "-pdf",
+                "-outdir=%DIR%",
+                "-auxdir=%DIR%/build",
+                "%DOC%"
+            ],
+            "env": {
+                "TEXINPUTS": "./polimi-beamer-template//:" 
+            }
+        }
+    ],
+    "latex-workshop.latex.clean.subfolder.enabled": true
+}

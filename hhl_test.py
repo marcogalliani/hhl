@@ -9,16 +9,15 @@ if __name__ == "__main__":
     x_cl = np.linalg.solve(A, b_vec)
     x_cl_norm = x_cl / np.linalg.norm(x_cl)
 
-    """"
+    #""""
     service = QiskitRuntimeService(
         channel="ibm_quantum_platform",
-        token=os.environ["QISKIT_IBM_TOKEN"],
-        instance=os.environ.get("QISKIT_IBM_INSTANCE"),
+        token=os.environ["QISKIT_IBM_TOKEN"]
     )
     backend = service.least_busy(operational=True, min_num_qubits=4)
     solver = HHLAlgorithm(backend=backend)
-    """
-    solver = HHLAlgorithm()
+    #"""
+    # solver = HHLAlgorithm()
     print(solver.build_circuit(A, b_vec).draw(output="text"))
 
     x_hhl, p_success = solver.solve(A, b_vec)
@@ -48,6 +47,7 @@ if __name__ == "__main__":
     # ---
     # Observable x^T M x
     # ---
+    """
     print("\n=== Observable ⟨x|M|x⟩ ===")
     M = np.array([[2.0, 0.5], [0.5, 1.0]])
     print(f"  M = {M.tolist()}")
@@ -57,6 +57,7 @@ if __name__ == "__main__":
     print(f"  Classical ⟨x_cl|M|x_cl⟩  : {obs_classical:.6f}")
     print(f"  Quantum   ⟨x_hhl|M|x_hhl⟩: {obs_quantum:.6f}")
     print(f"  Difference                : {abs(obs_classical - obs_quantum):.2e}")
+    """
 
     # ---
     # Shot-based simulation

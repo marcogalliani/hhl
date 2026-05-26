@@ -139,7 +139,7 @@ class HHLAlgorithm:
             circuit.h(self.system[0])
         circuit.measure(self.ancilla[0], self.classical[0])
         circuit.measure(self.system[0], self.classical[1])
-        result = self.__counts_to_result(self.run_circuit(circuit, shots), shots)
+        result = self.__counts_to_result(self.run_circuit(shots), shots)
         p_plus  = result.conditional.get("01", 0.0)  # sys=0 in rotated basis → +1 eigenvalue
         p_minus = result.conditional.get("11", 0.0)  # sys=1 in rotated basis → −1 eigenvalue
         return p_plus - p_minus
@@ -208,7 +208,46 @@ class HHLAlgorithm:
         """
         self.build_circuit(A, b, add_measurements=True)
         return self.__counts_to_result(self.run_circuit(shots), shots)
-    
+
+    def simulate_pre_uncompute(
+        self, A: np.ndarray, b: np.ndarray, shots: int = 1024
+    ) -> SimulationResult:
+        """Run QPE + reciprocal rotation only — stop before uncomputation — and measure all qubits.
+
+        Outcome format: 'phase_{n-1}...phase_0 sys anc'
+        The ancilla is always the rightmost character, so SimulationResult.conditional
+        still gives P(outcome | anc=1).
+
+        How to read the results to locate the error source
+        ---------------------------------------------------
+        For the default 2-qubit, 2-eigenvalue problem the phase register should collapse
+        to exactly two values:
+          j=1 ('01...'): eigenvalue λ=2/3  → C/λ = 1   → P(anc=1 | j=1) = 1.00
+          j=2 ('10...'): eigenvalue λ=4/3  → C/λ = 1/2 → P(anc=1 | j=2) = 0.25
+
+        - Phase peaks spread to j=0 or j=3 → error is in QPE (Hamiltonian simulation).
+        - Phase peaks correct but ancilla rates wrong → error is in the reciprocal rotation.
+        - Both correct here but wrong after uncomputation → error is in the uncompute step.
+        """
+        A = np.asarray(A, dtype=complex)
+        if A.shape != (2, 2) or not np.allclose(A, A.conj().T):
+            raise ValueError("A must be a 2×2 Hermitian matrix.")
+        n = len(self.phase)
+        # c[0]=anc (rightmost, endswith("1") ↔ anc=1), c[1]=sys, c[2..n+1]=phase[0..n-1]
+        c_all = ClassicalRegister(n + 2, "c")
+        self.circuit = QuantumCircuit(
+            self.system, self.phase, self.ancilla, c_all, name="hhl_pre_uncompute"
+        )
+        hamiltonian = SparsePauliOp.from_operator(A)
+        self.__prepare_b_state(b)
+        self.__apply_phase_estimation(hamiltonian)
+        self.__apply_reciprocal_rotation()
+        self.circuit.measure(self.ancilla[0], c_all[0])
+        self.circuit.measure(self.system[0], c_all[1])
+        for i, pq in enumerate(self.phase):
+            self.circuit.measure(pq, c_all[2 + i])
+        return self.__counts_to_result(self.run_circuit(shots), shots)
+
     def run_circuit(self, shots: int) -> dict[str, int]:
         """Run a circuit on self.backend (or BasicSimulator) and return raw counts."""
         if self.backend is None:

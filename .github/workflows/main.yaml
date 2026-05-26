@@ -29,4 +29,4 @@ jobs:
         # This pulls the secret securely and passes it to your script
         QISKIT_IBM_TOKEN: ${{ secrets.QISKIT_IBM_TOKEN }}
       run: |
-        python your_script_name.py
+        python hhlt_test.py
