@@ -14,4 +14,4 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-To execute code on real quantum hardware you will need an IBM API key
+To execute code on real quantum hardware you will need an IBM API key. 
