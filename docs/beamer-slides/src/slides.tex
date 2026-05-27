@@ -10,6 +10,7 @@
             \begin{equation*}
                 \ket{x} = \sum_{j=0}^{N_b-1} x_j \ket{j}
             \end{equation*}
+            Starting from this: $x^\top M x$
         \item \textbf{Logarithmic scaling in $N_b$:} \\ 
         \begin{equation*}
             \mathcal{O}(\log N_b \kappa^2/\epsilon) \quad \text{vs} \quad \mathcal{O}(N_b \kappa)
@@ -227,7 +228,7 @@
     \begin{equation*}
         \ket{j} \to U_{\text{QFT}}\ket{j} = \frac{1}{\sqrt{N_c}}\sum_{k=0}^{N_c} e^{i2\pi jk /N_c} \ket{k}
     \end{equation*}
-    leading to $\ket{x}=\sum_{j=0}^{N_c} x_j \ket{j} = \sum_j x_j QFT(\ket{j})$ expressed in the fourier basis. Unitary matrix representation:
+    leading to $\text{QFT}(\ket{x})= \sum_j x_j QFT(\ket{j})$  expressed in the fourier basis. Unitary matrix representation:
     \begin{equation*}
         U_{\text{QFT}} = \frac{1}{\sqrt{N_c}} 
         \begin{bmatrix}
@@ -248,7 +249,7 @@
     \begin{equation*}
         U_{\text{QFT}}\ket{N_c\phi} = \frac{1}{\sqrt{N_c}}\sum_{k=0}^{N_c-1} e^{i2\pi N_c\phi k / N_c} \ket{k}
     \end{equation*}
-    Thus, $\text{IQFT}(\text{QFT}(\ket{N\phi})) = \ket{N\phi}$
+    Thus, $\text{IQFT}(\text{QFT}(\ket{N_c\phi})) = \ket{N_c\phi}$
     
 \end{frame}
 
@@ -536,7 +537,7 @@
     \vspace{\baselineskip}
     After that the state is updated to 
     \begin{equation*}
-        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{\beta_j N_c}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} \beta_j\ket{u_j}\ket{\tilde{\lambda_j}}\frac{C}{\tilde{\lambda}_j}\ket{1}_a
+        \ket{\Psi_6} = \frac{1}{\sum_{j=0}^{2^{n_b}-1} |\frac{\beta_j N_c}{\tilde{\lambda}_j}|^2}\sum_{j=0}^{2^{n_b}-1} \frac{C}{\tilde{\lambda}_j}\beta_j\ket{u_j}\ket{\tilde{\lambda_j}}\ket{1}_a
     \end{equation*}
 \end{frame}
 
